@@ -1,0 +1,219 @@
+// ============================================================
+// RetroChat 2009 - Schema Prisma
+// PostgreSQL en Railway
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUM TYPES ──────────────────────────────────────────────
+
+enum UserStatus {
+  online
+  away
+  busy
+  invisible
+}
+
+enum UserRole {
+  user
+  moderator
+  admin
+}
+
+enum RoomMemberRole {
+  member
+  moderator
+  owner
+}
+
+enum ReportStatus {
+  pending
+  reviewed
+  resolved
+  dismissed
+}
+
+// ─── TABLA: users (reemplaza auth.users de Supabase) ────────
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @unique
+  passwordHash    String    @map("password_hash")
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  profile  Profile?
+
+  @@map("users")
+}
+
+// ─── TABLA: profiles ─────────────────────────────────────────
+
+model Profile {
+  id          String     @id @db.Uuid
+  username    String     @unique
+  displayName String     @map("display_name")
+  avatarUrl   String?    @map("avatar_url")
+  status      UserStatus @default(online)
+  bio         String     @default("")
+  role        UserRole   @default(user)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  lastSeenAt  DateTime   @default(now()) @map("last_seen_at")
+
+  // Relaciones
+  user        User            @relation(fields: [id], references: [id], onDelete: Cascade)
+  ownedRooms  Room[]          @relation("RoomOwner")
+  memberships RoomMember[]
+  messages    Message[]
+  blockedBy   Block[]         @relation("Blocked")
+  blockers    Block[]         @relation("Blocker")
+  filedReports  Report[]      @relation("Reporter")
+  receivedReports Report[]    @relation("Reported")
+  reviewedReports Report[]    @relation("Reviewer")
+  presence    RoomPresence[]
+
+  @@map("profiles")
+}
+
+// ─── TABLA: rooms ────────────────────────────────────────────
+
+model Room {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String
+  slug         String    @unique
+  description  String    @default("")
+  category     String    @default("general")
+  isPrivate    Boolean   @default(false) @map("is_private")
+  passwordHash String?   @map("password_hash")
+  ownerId      String    @map("owner_id") @db.Uuid
+  maxUsers     Int?      @map("max_users")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at")
+  closedAt     DateTime? @map("closed_at")
+
+  // Relaciones
+  owner    Profile       @relation("RoomOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members  RoomMember[]
+  messages Message[]
+  reports  Report[]
+  presence RoomPresence[]
+
+  @@index([ownerId])
+  @@index([isPrivate])
+  @@index([createdAt(sort: Desc)])
+  @@map("rooms")
+}
+
+// ─── TABLA: room_members ─────────────────────────────────────
+
+model RoomMember {
+  id       String         @id @default(uuid()) @db.Uuid
+  roomId   String         @map("room_id") @db.Uuid
+  userId   String         @map("user_id") @db.Uuid
+  role     RoomMemberRole @default(member)
+  joinedAt DateTime       @default(now()) @map("joined_at")
+  bannedAt DateTime?      @map("banned_at")
+  bannedBy String?        @map("banned_by") @db.Uuid
+  banReason String?       @map("ban_reason")
+
+  // Relaciones
+  room    Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+  @@map("room_members")
+}
+
+// ─── TABLA: messages ─────────────────────────────────────────
+
+model Message {
+  id        String    @id @default(uuid()) @db.Uuid
+  roomId    String    @map("room_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  content   String
+  isSystem  Boolean   @default(false) @map("is_system")
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  deletedBy String?   @map("deleted_by") @db.Uuid
+
+  // Relaciones
+  room    Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reports Report[]
+
+  @@index([roomId])
+  @@index([createdAt(sort: Desc)])
+  @@index([roomId, createdAt(sort: Desc)])
+  @@map("messages")
+}
+
+// ─── TABLA: blocks ───────────────────────────────────────────
+
+model Block {
+  id         String   @id @default(uuid()) @db.Uuid
+  blockerId  String   @map("blocker_id") @db.Uuid
+  blockedId  String   @map("blocked_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  blocker Profile @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked Profile @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+  @@map("blocks")
+}
+
+// ─── TABLA: reports ──────────────────────────────────────────
+
+model Report {
+  id             String       @id @default(uuid()) @db.Uuid
+  reporterId     String       @map("reporter_id") @db.Uuid
+  reportedUserId String?      @map("reported_user_id") @db.Uuid
+  messageId      String?      @map("message_id") @db.Uuid
+  roomId         String?      @map("room_id") @db.Uuid
+  reason         String
+  status         ReportStatus @default(pending)
+  adminNotes     String?      @map("admin_notes")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  reviewedAt     DateTime?    @map("reviewed_at")
+  reviewedBy     String?      @map("reviewed_by") @db.Uuid
+
+  // Relaciones
+  reporter Profile  @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reported Profile? @relation("Reported", fields: [reportedUserId], references: [id], onDelete: SetNull)
+  message  Message? @relation(fields: [messageId], references: [id], onDelete: SetNull)
+  room     Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  reviewer Profile? @relation("Reviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@map("reports")
+}
+
+// ─── TABLA: room_presence ────────────────────────────────────
+
+model RoomPresence {
+  id            String   @id @default(uuid()) @db.Uuid
+  roomId        String   @map("room_id") @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  lastHeartbeat DateTime @default(now()) @map("last_heartbeat")
+
+  // Relaciones
+  room    Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([lastHeartbeat])
+  @@map("room_presence")
+}

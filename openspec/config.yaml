@@ -1,0 +1,30 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Next.js 16.2.6 (App Router) + TypeScript 5 + Tailwind CSS v4 + Supabase (Auth + PostgreSQL + Realtime) + Zustand v5
+  Architecture: Server Components + Client Components + Server Actions + API Routes + RLS policies + Proxy middleware (Supabase sessions)
+  Testing: No framework de testing aún
+  Style: ESLint (eslint-config-next) + Tailwind v4 (PostCSS) + path alias @/*
+
+rules:
+  proposal:
+    - Incluir un plan de reversión (rollback) para cambios riesgosos
+    - Identificar los módulos/paquetes afectados
+  specs:
+    - Usar el formato Dado/Cuando/Entonces (Given/When/Then) para los escenarios
+    - Usar las palabras clave del RFC 2119 (DEBE, DEBERÁ, DEBERÍA, PODRÁ)
+  design:
+    - Incluir diagramas de secuencia para flujos complejos
+    - Documentar las decisiones de arquitectura con su respectiva justificación
+  tasks:
+    - Agrupar las tareas por fase (infraestructura, implementación, pruebas)
+    - Usar numeración jerárquica (1.1, 1.2, etc.)
+    - Mantener las tareas lo suficientemente pequeñas como para completarlas en una sola sesión
+  apply:
+    - Seguir los patrones de código y convenciones existentes
+    - Cargar las habilidades de programación (coding skills) relevantes para el stack del proyecto
+  verify:
+    - Ejecutar pruebas si existe la infraestructura de pruebas
+    - Comparar la implementación contra cada escenario de las especificaciones
+  archive:
+    - Advertir antes de fusionar deltas destructivos (eliminaciones grandes)

@@ -1,0 +1,643 @@
+@import "tailwindcss";
+
+/* ============================================================
+   RetroChat 2009 - Estilos globales
+   Estética Web 2.0: gradientes, brillos, sombras, fuentes retro
+   ============================================================ */
+
+:root {
+  /* Paleta principal - Azul Messenger 2009 */
+  --retro-blue-dark: #1a3a5c;
+  --retro-blue: #2060b0;
+  --retro-blue-light: #4080d0;
+  --retro-blue-glow: #60a0f0;
+
+  /* Violeta/morado 2009 */
+  --retro-purple: #6030a0;
+  --retro-purple-light: #9060c0;
+
+  /* Grises */
+  --retro-gray-dark: #2a2a3a;
+  --retro-gray: #4a4a5a;
+  --retro-gray-light: #8a8a9a;
+  --retro-gray-panel: #e8eaf0;
+  --retro-gray-border: #c0c4d0;
+
+  /* Colores de estado */
+  --status-online: #00cc44;
+  --status-away: #ffaa00;
+  --status-busy: #cc2222;
+  --status-invisible: #888899;
+
+  /* Fondo principal */
+  --bg-gradient-start: #1a2a4a;
+  --bg-gradient-end: #2a1a4a;
+
+  /* Tipografía retro */
+  --font-retro: Tahoma, Verdana, Arial, sans-serif;
+
+  /* Espaciado */
+  --panel-radius: 8px;
+  --button-radius: 4px;
+}
+
+@theme inline {
+  --color-retro-blue: var(--retro-blue);
+  --color-retro-purple: var(--retro-purple);
+  --font-sans: Tahoma, Verdana, Arial, sans-serif;
+}
+
+/* ============================================================
+   RESET Y BASE
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 13px; /* Tamaño retro 2009 */
+}
+
+body {
+  font-family: var(--font-retro);
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, #2a2a4a 50%, var(--bg-gradient-end) 100%);
+  background-attachment: fixed;
+  color: #1a1a2e;
+  min-height: 100vh;
+}
+
+/* Scrollbar retro */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #dde0eb;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #7090c0 0%, #4060a0 100%);
+  border-radius: 4px;
+  border: 1px solid #5070b0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #8090d0 0%, #5070b0 100%);
+}
+
+/* ============================================================
+   COMPONENTES RETRO 2009
+   ============================================================ */
+
+/* Panel / Contenedor glossy */
+.retro-panel {
+  background: linear-gradient(180deg, #f0f4ff 0%, #e4e8f8 100%);
+  border: 1px solid #a0b0d0;
+  border-radius: var(--panel-radius);
+  box-shadow:
+    0 2px 8px rgba(0, 40, 100, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Panel oscuro */
+.retro-panel-dark {
+  background: linear-gradient(180deg, #2a3a5a 0%, #1a2a4a 100%);
+  border: 1px solid #3a4a6a;
+  border-radius: var(--panel-radius);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  color: #c0d0f0;
+}
+
+/* Header glossy estilo 2009 */
+.retro-header {
+  background: linear-gradient(180deg,
+    #3a70d0 0%,
+    #2050a8 40%,
+    #1a3a80 60%,
+    #2050a8 100%
+  );
+  border-bottom: 2px solid #1a3060;
+  box-shadow: 0 3px 8px rgba(0, 0, 50, 0.4);
+}
+
+/* Botón brillante Web 2.0 */
+.retro-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 14px;
+  font-family: var(--font-retro);
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: var(--button-radius);
+  border: 1px solid;
+  transition: all 0.1s ease;
+  text-decoration: none;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.retro-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.retro-btn:active {
+  transform: translateY(1px);
+}
+
+/* Botón primario azul */
+.retro-btn-primary {
+  background: linear-gradient(180deg, #4a80e0 0%, #2060c0 40%, #1a50b0 60%, #2060c0 100%);
+  border-color: #1040a0;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 80, 0.5);
+  box-shadow: 0 2px 4px rgba(0, 30, 100, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.retro-btn-primary:hover {
+  background: linear-gradient(180deg, #5a90f0 0%, #3070d0 40%, #2060c0 60%, #3070d0 100%);
+  box-shadow: 0 2px 6px rgba(0, 30, 100, 0.5);
+}
+
+/* Botón secundario gris */
+.retro-btn-secondary {
+  background: linear-gradient(180deg, #f0f4ff 0%, #d8dce8 40%, #c8ccd8 60%, #d8dce8 100%);
+  border-color: #a0a8c0;
+  color: #2a3a5a;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+.retro-btn-secondary:hover {
+  background: linear-gradient(180deg, #f8f8ff 0%, #e0e4f0 40%, #d0d4e0 60%, #e0e4f0 100%);
+}
+
+/* Botón peligro rojo */
+.retro-btn-danger {
+  background: linear-gradient(180deg, #e04040 0%, #c02020 40%, #b01010 60%, #c02020 100%);
+  border-color: #900010;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(80, 0, 0, 0.5);
+  box-shadow: 0 2px 4px rgba(100, 0, 0, 0.3);
+}
+
+.retro-btn-danger:hover {
+  background: linear-gradient(180deg, #f05050 0%, #d03030 40%, #c02020 60%, #d03030 100%);
+}
+
+/* Botón verde OK */
+.retro-btn-success {
+  background: linear-gradient(180deg, #40c040 0%, #20a020 40%, #108010 60%, #20a020 100%);
+  border-color: #108010;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 50, 0, 0.5);
+  box-shadow: 0 2px 4px rgba(0, 60, 0, 0.3);
+}
+
+/* Botón Zumbido */
+.retro-btn-buzz {
+  background: linear-gradient(180deg, #f0a020 0%, #d08000 40%, #c07000 60%, #d08000 100%);
+  border-color: #a06000;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(80, 40, 0, 0.5);
+  box-shadow: 0 2px 4px rgba(100, 50, 0, 0.3);
+  animation: none;
+}
+
+.retro-btn-buzz.buzzing {
+  animation: buzz 0.3s ease-in-out 3;
+}
+
+@keyframes buzz {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+/* Input retro */
+.retro-input {
+  background: #ffffff;
+  border: 1px solid #a0b0d0;
+  border-radius: var(--button-radius);
+  padding: 5px 8px;
+  font-family: var(--font-retro);
+  font-size: 12px;
+  color: #1a1a2e;
+  box-shadow: inset 0 1px 3px rgba(0, 30, 100, 0.15);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  width: 100%;
+}
+
+.retro-input:focus {
+  border-color: #4070c0;
+  box-shadow: inset 0 1px 3px rgba(0, 30, 100, 0.2), 0 0 4px rgba(60, 100, 200, 0.4);
+}
+
+.retro-input::placeholder {
+  color: #a0a8b8;
+}
+
+/* Textarea retro */
+.retro-textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Label retro */
+.retro-label {
+  font-size: 11px;
+  font-weight: bold;
+  color: #3a4a6a;
+  display: block;
+  margin-bottom: 3px;
+}
+
+/* Badge estilo 2009 */
+.retro-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: bold;
+  border: 1px solid;
+}
+
+.retro-badge-new {
+  background: linear-gradient(180deg, #ff8040 0%, #e04000 100%);
+  border-color: #c03000;
+  color: #ffffff;
+}
+
+.retro-badge-hot {
+  background: linear-gradient(180deg, #ff4040 0%, #cc0000 100%);
+  border-color: #990000;
+  color: #ffffff;
+}
+
+.retro-badge-online {
+  background: linear-gradient(180deg, #40dd40 0%, #00aa00 100%);
+  border-color: #007700;
+  color: #ffffff;
+}
+
+.retro-badge-private {
+  background: linear-gradient(180deg, #b060e0 0%, #8030b0 100%);
+  border-color: #6020a0;
+  color: #ffffff;
+}
+
+/* Separador retro */
+.retro-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #a0b0d0, transparent);
+  margin: 8px 0;
+}
+
+/* Título de sección estilo 2009 */
+.retro-section-title {
+  font-size: 11px;
+  font-weight: bold;
+  color: #2a4a8a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  background: linear-gradient(90deg, #d0d8f0, #e8eaf8);
+  border-left: 3px solid #4060c0;
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 8px;
+}
+
+/* Avatar retro */
+.retro-avatar {
+  border: 2px solid #a0b0d0;
+  border-radius: 4px;
+  background: #e0e8ff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  object-fit: cover;
+}
+
+/* Status indicator dot */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.status-dot-online { background: var(--status-online); }
+.status-dot-away { background: var(--status-away); }
+.status-dot-busy { background: var(--status-busy); }
+.status-dot-invisible { background: var(--status-invisible); }
+
+/* Mensaje de chat */
+.chat-message {
+  padding: 6px 10px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+  font-size: 12px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.chat-message:hover {
+  background: rgba(60, 100, 200, 0.06);
+}
+
+.chat-message.own {
+  background: rgba(60, 100, 200, 0.08);
+  border-left: 2px solid #4060c0;
+}
+
+.chat-message.system {
+  color: #6070a0;
+  font-style: italic;
+  text-align: center;
+  font-size: 11px;
+  padding: 4px;
+}
+
+.chat-message.deleted {
+  opacity: 0.5;
+  font-style: italic;
+  color: #888;
+}
+
+/* Indicador typing */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #6070a0;
+  font-style: italic;
+}
+
+.typing-dots span {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #8090c0;
+  animation: typingBounce 1.2s infinite;
+}
+
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Card de sala */
+.room-card {
+  background: linear-gradient(180deg, #f8faff 0%, #eef0f8 100%);
+  border: 1px solid #b0bcd8;
+  border-radius: 6px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 30, 100, 0.1);
+}
+
+.room-card:hover {
+  background: linear-gradient(180deg, #f0f4ff 0%, #e4e8f8 100%);
+  border-color: #7090d0;
+  box-shadow: 0 2px 8px rgba(0, 30, 100, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Loading spinner retro */
+.retro-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #c0d0f0;
+  border-top-color: #2060c0;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Tooltip retro */
+.retro-tooltip {
+  position: relative;
+}
+
+.retro-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a2a4a;
+  color: #c0d0f0;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  border: 1px solid #3a4a6a;
+  z-index: 100;
+}
+
+.retro-tooltip:hover::after {
+  opacity: 1;
+}
+
+/* Selects retro */
+.retro-select {
+  background: linear-gradient(180deg, #ffffff 0%, #eef0f8 100%);
+  border: 1px solid #a0b0d0;
+  border-radius: var(--button-radius);
+  padding: 5px 24px 5px 8px;
+  font-family: var(--font-retro);
+  font-size: 12px;
+  color: #1a1a2e;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234060a0'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  box-shadow: inset 0 1px 3px rgba(0,30,100,0.1);
+  outline: none;
+}
+
+.retro-select:focus {
+  border-color: #4070c0;
+}
+
+/* Checkbox retro */
+.retro-checkbox {
+  width: 14px;
+  height: 14px;
+  border: 1px solid #a0b0d0;
+  border-radius: 2px;
+  background: #fff;
+  cursor: pointer;
+  accent-color: #3060c0;
+}
+
+/* Notificación / Toast retro */
+.retro-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(180deg, #2a4a8a 0%, #1a3a7a 100%);
+  color: #c0d8ff;
+  border: 1px solid #3a5a9a;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  animation: slideInToast 0.3s ease;
+}
+
+@keyframes slideInToast {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Error state */
+.retro-error {
+  background: linear-gradient(180deg, #fff0f0 0%, #ffe8e8 100%);
+  border: 1px solid #e0a0a0;
+  border-left: 3px solid #cc2222;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #8a1a1a;
+}
+
+/* Success state */
+.retro-success {
+  background: linear-gradient(180deg, #f0fff0 0%, #e8ffe8 100%);
+  border: 1px solid #90d090;
+  border-left: 3px solid #22aa22;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #1a6a1a;
+}
+
+/* Empty state */
+.retro-empty {
+  text-align: center;
+  padding: 30px;
+  color: #8090b0;
+  font-size: 12px;
+}
+
+.retro-empty .empty-icon {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 10px;
+  opacity: 0.5;
+}
+
+/* Sidebar de usuarios */
+.users-sidebar {
+  background: linear-gradient(180deg, #e8ecf8 0%, #dce0f0 100%);
+  border-left: 1px solid #a0b0d0;
+  min-width: 160px;
+  max-width: 180px;
+}
+
+/* Barra de chat inferior */
+.chat-input-bar {
+  background: linear-gradient(180deg, #e4e8f8 0%, #dce0f0 100%);
+  border-top: 1px solid #b0bcd8;
+  padding: 8px;
+}
+
+/* Flicker en nuevo mensaje */
+@keyframes newMessage {
+  0% { background: rgba(80, 120, 255, 0.15); }
+  100% { background: transparent; }
+}
+
+.message-new {
+  animation: newMessage 1.5s ease-out forwards;
+}
+
+/* Logo retro */
+.retro-logo {
+  font-family: 'Comic Sans MS', Tahoma, sans-serif;
+  font-size: 22px;
+  font-weight: bold;
+  background: linear-gradient(180deg, #ffffff 0%, #c0d8ff 50%, #a0c0ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 4px rgba(0,0,100,0.5));
+  letter-spacing: -0.5px;
+}
+
+/* Footer retro */
+.retro-footer {
+  background: rgba(0, 0, 40, 0.4);
+  border-top: 1px solid rgba(100, 150, 255, 0.2);
+  font-size: 11px;
+  color: rgba(160, 190, 255, 0.7);
+  text-align: center;
+  padding: 8px;
+}
+
+.retro-footer a {
+  color: rgba(160, 190, 255, 0.9);
+  text-decoration: none;
+}
+
+.retro-footer a:hover {
+  color: #c0d8ff;
+  text-decoration: underline;
+}
+
+/* Animación de entrada para sala */
+@keyframes fadeInRoom {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.room-enter {
+  animation: fadeInRoom 0.2s ease-out forwards;
+}
+
+/* Temas visuales */
+.theme-messenger {
+  --bg-gradient-start: #1a3a5c;
+  --bg-gradient-end: #2a1a4c;
+}
+
+.theme-forum {
+  --bg-gradient-start: #2a2a2a;
+  --bg-gradient-end: #1a1a2a;
+}
+
+.theme-irc {
+  --bg-gradient-start: #0a0a0a;
+  --bg-gradient-end: #0a0a1a;
+}
