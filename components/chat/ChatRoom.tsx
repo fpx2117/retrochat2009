@@ -73,6 +73,7 @@ export function ChatRoom({
   const eventSourceRef = useRef<EventSource | null>(null)
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const isAtBottomRef = useRef(true)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   // Scroll to bottom
   const scrollToBottom = useCallback((force = false) => {
@@ -268,6 +269,7 @@ export function ChatRoom({
     }
 
     setIsSending(false)
+    inputRef.current?.focus()
   }
 
   // ─── Zumbido ────────────────────────────────────────────────
@@ -602,6 +604,7 @@ export function ChatRoom({
               setInputValue(prev => prev + ' ' + code + ' ')
             }} />
             <textarea
+              ref={inputRef}
               className="retro-input flex-1 resize-none"
               rows={1}
               placeholder={currentMember
