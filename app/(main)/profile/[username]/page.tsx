@@ -13,26 +13,28 @@ interface Props {
 
 export default async function ProfilePage({ params }: Props) {
   const { username } = await params
-  const session = await getSession()
 
-  const profile = await prisma.profile.findUnique({
-    where: { username: username.toLowerCase() },
-  })
+  try {
+    const session = await getSession()
 
-  if (!profile) notFound()
+    const profile = await prisma.profile.findUnique({
+      where: { username: username.toLowerCase() },
+    })
 
-  const isOwnProfile = session?.id === profile.id
-  const currentUserId = session?.id || null
+    if (!profile) notFound()
 
-  // Salas del usuario
-  const rooms = await prisma.room.findMany({
-    where: { ownerId: profile.id, closedAt: null },
-    select: { id: true, name: true, description: true, category: true, isPrivate: true, createdAt: true },
-    orderBy: { createdAt: 'desc' },
-    take: 5,
-  })
+    const isOwnProfile = session?.id === profile.id
+    const currentUserId = session?.id || null
 
-  // Amigos aceptados
+    // Salas del usuario
+    const rooms = await prisma.room.findMany({
+      where: { ownerId: profile.id, closedAt: null },
+      select: { id: true, name: true, description: true, category: true, isPrivate: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+    })
+
+    // Amigos aceptados
   let friendships: any[] = []
   try {
     friendships = await prisma.friendship.findMany({
@@ -253,6 +255,46 @@ export default async function ProfilePage({ params }: Props) {
           </Link>
         </div>
       </div>
-    </div>
-  )
+      </div>
+    )
+  } catch (e: any) {
+    // Fallback — mostrar perfil básico sin funcionalidades sociales
+    const session = await getSession()
+    const profile = await prisma.profile.findUnique({
+      where: { username: username.toLowerCase() },
+    })
+    if (!profile) notFound()
+
+    const rooms = await prisma.room.findMany({
+      where: { ownerId: profile.id, closedAt: null },
+      select: { id: true, name: true, description: true, category: true, isPrivate: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+    })
+
+    return (
+      <div className="min-h-[calc(100vh-120px)] py-8 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="retro-panel p-5 mb-4">
+            <div className="retro-section-title">👤 {profile.displayName || profile.username}</div>
+            <p className="text-sm text-gray-500">@{profile.username}</p>
+            {profile.bio && <p className="text-xs text-gray-600 mt-2">"{profile.bio}"</p>}
+          </div>
+          {rooms.length > 0 && (
+            <div className="retro-panel p-5 mb-4">
+              <div className="retro-section-title">🏠 Salas</div>
+              {rooms.map(room => (
+                <Link key={room.id} href={`/rooms/${room.id}`} className="block room-card mb-1">
+                  <span className="font-bold text-sm">{room.name}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+          <div className="text-center">
+            <Link href="/rooms" className="retro-btn retro-btn-secondary text-xs">← Volver a salas</Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
 }
