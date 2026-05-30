@@ -48,6 +48,20 @@ export function Header() {
       if (dmResult.count !== undefined) setUnreadDMs(dmResult.count)
     }
     loadPending()
+
+    // SSE para notificaciones de mensajes privados
+    const es = new EventSource('/api/dm/events')
+    es.addEventListener('new_dm', (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data)
+        setDmNotification({ from: data.senderName, username: data.senderUsername })
+        setUnreadDMs(prev => prev + 1)
+        playMsnBeep()
+        // Sin timeout — la notificación se queda hasta que el usuario la cierre
+      } catch {}
+    })
+
+    return () => { es.close() }
   }, [user, pathname])
 
   const handleLogout = async () => {
@@ -205,8 +219,12 @@ export function Header() {
 
       {/* Barra de notificación MSN */}
       {dmNotification && (
-        <div className="px-4 py-1.5 flex items-center justify-between gap-3 text-xs"
-          style={{ background: 'linear-gradient(180deg, #fff9c4 0%, #fff176 100%)', borderBottom: '1px solid #f9a825' }}>
+        <div className="px-4 py-1.5 flex items-center justify-between gap-3 text-xs animate-pulse"
+          style={{
+            background: 'linear-gradient(180deg, #fff9c4 0%, #fff176 100%)',
+            borderBottom: '1px solid #f9a825',
+            animation: 'blink-msn 0.8s ease-in-out infinite',
+          }}>
           <span className="text-gray-800 font-bold">
             ✉️ <strong>{dmNotification.from}</strong> te ha enviado un mensaje
           </span>

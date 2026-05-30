@@ -641,3 +641,9 @@ body {
   --bg-gradient-start: #0a0a0a;
   --bg-gradient-end: #0a0a1a;
 }
+
+/* Animación parpadeo notificación MSN */
+@keyframes blink-msn {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; background: linear-gradient(180deg, #ffeb3b 0%, #ffd600 100%); }
+}
