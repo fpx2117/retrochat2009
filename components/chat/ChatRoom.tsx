@@ -47,7 +47,11 @@ export function ChatRoom({
   const [hasMoreMessages, setHasMoreMessages] = useState(initialMessages.length === 30)
   const [loadingMore, setLoadingMore] = useState(false)
   const [passwordInput, setPasswordInput] = useState('')
-  const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg'>('sm')
+  const [fontSize, setFontSize] = useState<'xs' | 'sm' | 'base' | 'lg' | 'xl'>('sm')
+
+  const fontSizes = ['xs', 'sm', 'base', 'lg', 'xl'] as const
+  const fontSizeClass = (size: typeof fontSizes[number]) =>
+    size === 'xs' ? 'text-xs' : size === 'sm' ? 'text-sm' : size === 'base' ? 'text-base' : size === 'lg' ? 'text-lg' : 'text-xl'
   const [needsPassword] = useState(room.is_private && !initialMember)
   const [joiningRoom, setJoiningRoom] = useState(false)
   const [joinError, setJoinError] = useState<string | null>(null)
@@ -469,14 +473,21 @@ export function ChatRoom({
             {/* Tamaño letra */}
             <div className="flex items-center gap-0.5">
               <button
-                onClick={() => setFontSize(fontSize === 'lg' ? 'base' : fontSize === 'base' ? 'sm' : 'sm')}
-                disabled={fontSize === 'sm'}
+                onClick={() => {
+                  const idx = fontSizes.indexOf(fontSize)
+                  if (idx > 0) setFontSize(fontSizes[idx - 1])
+                }}
+                disabled={fontSize === 'xs'}
                 className="retro-btn retro-btn-secondary text-xs px-1.5"
                 title="Letra más chica"
               >A-</button>
+              <span className="text-xs text-gray-500 w-4 text-center">{fontSize === 'xs' ? 'xs' : fontSize === 'sm' ? 's' : fontSize === 'base' ? 'm' : fontSize === 'lg' ? 'l' : 'xl'}</span>
               <button
-                onClick={() => setFontSize(fontSize === 'sm' ? 'base' : fontSize === 'base' ? 'lg' : 'lg')}
-                disabled={fontSize === 'lg'}
+                onClick={() => {
+                  const idx = fontSizes.indexOf(fontSize)
+                  if (idx < fontSizes.length - 1) setFontSize(fontSizes[idx + 1])
+                }}
+                disabled={fontSize === 'xl'}
                 className="retro-btn retro-btn-secondary text-xs px-1.5"
                 title="Letra más grande"
               >A+</button>
@@ -765,7 +776,7 @@ function MessageItem({
   onBan,
   onContextMenu,
   isNew,
-  fontSize = 'sm' as 'sm' | 'base' | 'lg',
+  fontSize = 'sm' as 'xs' | 'sm' | 'base' | 'lg' | 'xl',
 }: {
   message: any
   currentUserId: string | null
@@ -777,7 +788,7 @@ function MessageItem({
   onBan: (userId: string, username: string) => void
   onContextMenu: (x: number, y: number, message: any) => void
   isNew: boolean
-  fontSize?: 'sm' | 'base' | 'lg'
+  fontSize?: 'xs' | 'sm' | 'base' | 'lg' | 'xl'
 }) {
   if (message.is_system) {
     return <div className="chat-message system">{message.content}</div>
@@ -825,7 +836,7 @@ function MessageItem({
             </span>
           </div>
 
-          <div className={`${fontSize === 'sm' ? 'text-xs' : fontSize === 'base' ? 'text-sm' : 'text-base'} text-gray-800 whitespace-pre-wrap break-words ${
+          <div className={`${fontSize === 'xs' ? 'text-xs' : fontSize === 'sm' ? 'text-sm' : fontSize === 'base' ? 'text-base' : fontSize === 'lg' ? 'text-lg' : 'text-xl'} text-gray-800 whitespace-pre-wrap break-words ${
             isAsciiArt(message.content) ? 'font-mono' : ''
           }`}>
             {content}

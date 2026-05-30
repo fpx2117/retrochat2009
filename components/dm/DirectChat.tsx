@@ -18,7 +18,8 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
   const [inputValue, setInputValue] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg'>('sm')
+  const [fontSize, setFontSize] = useState<'xs' | 'sm' | 'base' | 'lg' | 'xl'>('sm')
+  const fontSizes = ['xs', 'sm', 'base', 'lg', 'xl'] as const
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const eventSourceRef = useRef<EventSource | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -124,14 +125,20 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
           className="text-white hover:text-red-200 text-xs font-bold px-2">✕</button>
         <div className="flex items-center gap-0.5 ml-1">
           <button
-            onClick={() => setFontSize(fontSize === 'lg' ? 'base' : fontSize === 'base' ? 'sm' : 'sm')}
-            disabled={fontSize === 'sm'}
+            onClick={() => {
+              const idx = fontSizes.indexOf(fontSize)
+              if (idx > 0) setFontSize(fontSizes[idx - 1] as any)
+            }}
+            disabled={fontSize === 'xs'}
             className="text-white/70 hover:text-white text-xs px-1 disabled:opacity-30"
             title="Letra más chica"
           >A-</button>
           <button
-            onClick={() => setFontSize(fontSize === 'sm' ? 'base' : fontSize === 'base' ? 'lg' : 'lg')}
-            disabled={fontSize === 'lg'}
+            onClick={() => {
+              const idx = fontSizes.indexOf(fontSize)
+              if (idx < fontSizes.length - 1) setFontSize(fontSizes[idx + 1] as any)
+            }}
+            disabled={fontSize === 'xl'}
             className="text-white/70 hover:text-white text-xs px-1 disabled:opacity-30"
             title="Letra más grande"
           >A+</button>
@@ -167,7 +174,7 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
                       {sender.displayName || sender.username || otherUser.displayName}
                     </span>
                   )}
-                  <div className={`px-2.5 py-1.5 rounded-lg ${fontSize === 'sm' ? 'text-xs' : fontSize === 'base' ? 'text-sm' : 'text-base'} whitespace-pre-wrap break-words ${
+                  <div className={`px-2.5 py-1.5 rounded-lg ${fontSize === 'xs' ? 'text-xs' : fontSize === 'sm' ? 'text-sm' : fontSize === 'base' ? 'text-base' : fontSize === 'lg' ? 'text-lg' : 'text-xl'} whitespace-pre-wrap break-words ${
                     isAsciiArt(msg.content) ? 'font-mono' : ''
                   } ${
                     isOwn
