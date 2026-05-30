@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { sendDirectMessage, getConversation, markAsRead } from '@/app/api/dm/actions'
 import { convertEmoticons, formatMessageTime } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
+import { EmojiPicker } from '@/components/chat/EmojiPicker'
 
 interface DirectChatProps {
   currentUser: { id: string; username: string; displayName: string; avatarUrl: string | null }
@@ -188,6 +189,9 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
       {/* Input */}
       <div className="chat-input-bar flex-shrink-0">
         <form onSubmit={handleSend} className="flex gap-2 items-center">
+          <EmojiPicker onSelect={(code) => {
+            setInputValue(prev => prev + ' ' + code + ' ')
+          }} />
           <input
             ref={inputRef}
             type="text"

@@ -8,6 +8,7 @@ import { joinRoom, leaveRoom, banUser, promoteToModerator, closeRoom } from '@/a
 import { convertEmoticons, formatMessageTime, formatRelativeTime, parseCommand } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { EmojiPicker } from '@/components/chat/EmojiPicker'
 import { getCurrentUser } from '@/lib/auth/client'
 import type { UserStatus } from '@/types'
 import { USER_STATUSES } from '@/types'
@@ -546,6 +547,9 @@ export function ChatRoom({
         {/* Input de mensaje */}
         <div className="chat-input-bar flex-shrink-0">
           <form onSubmit={handleSendMessage} className="flex gap-2 items-center">
+            <EmojiPicker onSelect={(code) => {
+              setInputValue(prev => prev + ' ' + code + ' ')
+            }} />
             <input
               type="text"
               className="retro-input flex-1"
