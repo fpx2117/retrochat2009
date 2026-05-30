@@ -1,10 +1,16 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { initAudioOnInteraction } from '@/lib/audio'
 
 export function TitleBlink() {
   const originalTitle = useRef('RetroChat 2009')
   const blinkRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Inicializar audio en la primera interacción
+  useEffect(() => {
+    initAudioOnInteraction()
+  }, [])
 
   useEffect(() => {
     originalTitle.current = document.title

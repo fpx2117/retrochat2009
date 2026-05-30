@@ -1,12 +1,30 @@
 // Sonido MSN simple usando Web Audio API
 let audioCtx: AudioContext | null = null
 let lastBeep = 0
+let initialized = false
 
 function getAudioContext() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
   }
+  // Reanudar si está suspendido (política de autoplay)
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume()
+  }
   return audioCtx
+}
+
+// Inicializar AudioContext en la primera interacción del usuario
+export function initAudioOnInteraction() {
+  if (initialized) return
+  initialized = true
+
+  const events = ['click', 'touchstart', 'keydown']
+  const handler = () => {
+    getAudioContext()
+    events.forEach(e => document.removeEventListener(e, handler))
+  }
+  events.forEach(e => document.addEventListener(e, handler, { once: true }))
 }
 
 export function playMsnBeep() {
