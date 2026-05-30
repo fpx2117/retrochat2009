@@ -103,6 +103,23 @@ export function ChatRoom({
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
+  // Autocompletado /msg
+  const msgSuggestions = (() => {
+    if (!inputValue.startsWith('/msg ')) return []
+    const partial = inputValue.slice(5).trim().toLowerCase()
+    if (partial.includes(' ')) return []
+    if (!partial) return members.filter((m: any) => m.profile && m.profile.id !== currentUser?.id).slice(0, 8)
+    return members
+      .filter((m: any) =>
+        m.profile &&
+        m.profile.id !== currentUser?.id &&
+        (m.profile.username?.toLowerCase().startsWith(partial) ||
+         m.profile.displayName?.toLowerCase().includes(partial))
+      )
+      .slice(0, 8)
+  })()
+  const [selectedSuggestion, setSelectedSuggestion] = useState(-1)
+
   // Inicializar SSE + presencia
   useEffect(() => {
     if (!currentUser || !currentMember) return
@@ -651,25 +668,77 @@ export function ChatRoom({
             <EmojiPicker onSelect={(code) => {
               setInputValue(prev => prev + ' ' + code + ' ')
             }} />
-            <textarea
-              ref={inputRef}
-              className="retro-input flex-1 resize-none"
-              rows={1}
-              placeholder={currentMember
-                ? 'Escribí un mensaje... (Shift+Enter para nueva línea)'
-                : 'Únete a la sala para escribir'
-              }
-              value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  handleSendMessage()
+            <div className="relative flex-1">
+              <textarea
+                ref={inputRef}
+                className="retro-input w-full resize-none"
+                rows={1}
+                placeholder={currentMember
+                  ? 'Escribí un mensaje... (Shift+Enter para nueva línea)'
+                  : 'Únete a la sala para escribir'
                 }
-              }}
-              disabled={isSending || !currentMember}
-              autoFocus
-            />
+                value={inputValue}
+                onChange={e => {
+                  setInputValue(e.target.value)
+                  setSelectedSuggestion(-1)
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Tab' && msgSuggestions.length > 0) {
+                    e.preventDefault()
+                    const idx = selectedSuggestion >= 0 ? selectedSuggestion : 0
+                    const user = msgSuggestions[idx]
+                    if (user?.profile?.username) {
+                      setInputValue(`/msg ${user.profile.username} `)
+                      setSelectedSuggestion(-1)
+                    }
+                    return
+                  }
+                  if (e.key === 'ArrowDown' && msgSuggestions.length > 0) {
+                    e.preventDefault()
+                    setSelectedSuggestion(s => Math.min(s + 1, msgSuggestions.length - 1))
+                    return
+                  }
+                  if (e.key === 'ArrowUp' && msgSuggestions.length > 0) {
+                    e.preventDefault()
+                    setSelectedSuggestion(s => Math.max(s - 1, -1))
+                    return
+                  }
+                  if (e.key === 'Escape') {
+                    setSelectedSuggestion(-1)
+                    return
+                  }
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSendMessage()
+                  }
+                }}
+                disabled={isSending || !currentMember}
+                autoFocus
+              />
+              {/* Dropdown autocompletado /msg */}
+              {msgSuggestions.length > 0 && (
+                <div className="absolute bottom-full left-0 right-0 mb-1 retro-panel shadow-lg z-50 max-h-40 overflow-y-auto">
+                  {msgSuggestions.map((m: any, i: number) => (
+                    <button
+                      key={m.profile.id}
+                      type="button"
+                      className={`w-full text-left px-3 py-1.5 text-xs hover:bg-blue-50 flex items-center gap-2 ${
+                        i === selectedSuggestion ? 'bg-blue-100' : ''
+                      }`}
+                      onClick={() => {
+                        setInputValue(`/msg ${m.profile.username} `)
+                        setSelectedSuggestion(-1)
+                        inputRef.current?.focus()
+                      }}
+                    >
+                      <span className="font-bold text-gray-700">{m.profile.displayName || m.profile.username}</span>
+                      <span className="text-gray-400">@{m.profile.username}</span>
+                      <span className="ml-auto text-xs text-gray-400">{m.role === 'owner' ? '👑' : m.role === 'moderator' ? '🛡️' : ''}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               type="submit"
               className="retro-btn retro-btn-primary text-xs"
