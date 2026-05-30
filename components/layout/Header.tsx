@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useState, useEffect, useCallback } from 'react'
 import { getCurrentUser, signOut } from '@/lib/auth/client'
 import { getPendingRequestCount } from '@/app/api/friends/actions'
@@ -28,6 +28,7 @@ export function Header() {
   const [unreadDMs, setUnreadDMs] = useState(0)
   const [dmNotification, setDmNotification] = useState<{ from: string; username: string } | null>(null)
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     const loadUser = async () => {
@@ -36,7 +37,7 @@ export function Header() {
       setLoading(false)
     }
     loadUser()
-  }, [])
+  }, [pathname])
 
   useEffect(() => {
     if (!user) return
@@ -47,21 +48,7 @@ export function Header() {
       if (dmResult.count !== undefined) setUnreadDMs(dmResult.count)
     }
     loadPending()
-
-    // SSE para DMs
-    const es = new EventSource('/api/dm/events')
-    es.addEventListener('new_dm', (e: MessageEvent) => {
-      try {
-        const data = JSON.parse(e.data)
-        setDmNotification({ from: data.senderName, username: data.senderUsername })
-        setUnreadDMs(prev => prev + 1)
-        playMsnBeep()
-        setTimeout(() => setDmNotification(null), 8000)
-      } catch {}
-    })
-
-    return () => { es.close() }
-  }, [user])
+  }, [user, pathname])
 
   const handleLogout = async () => {
     await signOut()
