@@ -23,8 +23,8 @@ export async function sendMessage(roomId: string, content: string) {
   if (!sanitized || sanitized.trim().length === 0) {
     return { error: 'El mensaje no puede estar vacío' }
   }
-  if (sanitized.length > 500) {
-    return { error: 'Mensaje demasiado largo (máx 500 caracteres)' }
+  if (sanitized.length > 5000) {
+    return { error: 'Mensaje demasiado largo (máx 5000 caracteres)' }
   }
 
   // Verificar membresía y ban

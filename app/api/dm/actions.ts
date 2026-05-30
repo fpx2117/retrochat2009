@@ -10,7 +10,7 @@ export async function sendDirectMessage(receiverId: string, content: string) {
   if (!session) return { error: 'Debes iniciar sesión' }
 
   if (!content.trim()) return { error: 'El mensaje no puede estar vacío' }
-  if (content.length > 500) return { error: 'Máximo 500 caracteres' }
+  if (content.length > 5000) return { error: 'Máximo 5000 caracteres' }
 
   const receiver = await prisma.profile.findUnique({
     where: { id: receiverId },
