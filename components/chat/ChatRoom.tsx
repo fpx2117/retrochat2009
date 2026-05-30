@@ -89,6 +89,19 @@ export function ChatRoom({
     isAtBottomRef.current = scrollHeight - scrollTop - clientHeight < 50
   }, [])
 
+  // Auto-focus al tipear: cualquier tecla enfoca el textarea
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const tag = (document.activeElement?.tagName || '').toLowerCase()
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return
+      if (e.ctrlKey || e.altKey || e.metaKey) return
+      if (['Escape', 'Tab', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'].includes(e.key)) return
+      inputRef.current?.focus()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   // Inicializar SSE + presencia
   useEffect(() => {
     if (!currentUser || !currentMember) return

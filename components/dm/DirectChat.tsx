@@ -36,6 +36,20 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
     markAsRead(otherUser.id)
   }, [otherUser.id])
 
+  // Auto-focus al tipear
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const tag = (document.activeElement?.tagName || '').toLowerCase()
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return
+      if (e.ctrlKey || e.altKey || e.metaKey) return
+      if (e.key.startsWith('F') && e.key.length <= 3) return
+      if (['Escape', 'Tab'].includes(e.key)) return
+      inputRef.current?.focus()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   // SSE para nuevos mensajes
   useEffect(() => {
     const es = new EventSource('/api/dm/events')
