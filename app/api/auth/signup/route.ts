@@ -6,13 +6,14 @@ import { validateUsername } from '@/lib/utils'
 
 export async function POST(request: Request) {
   try {
-    const { email, password, username, display_name } = await request.json()
+    const { password, username, display_name } = await request.json()
 
-    if (!email || !password || !username || !display_name) {
+    if (!password || !username || !display_name) {
       return NextResponse.json({ error: 'Todos los campos son obligatorios' }, { status: 400 })
     }
 
-    const usernameError = validateUsername(username)
+    const cleanUsername = username.toLowerCase().trim()
+    const usernameError = validateUsername(cleanUsername)
     if (usernameError) {
       return NextResponse.json({ error: `Username inválido: ${usernameError}` }, { status: 400 })
     }
@@ -25,15 +26,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'El nombre debe tener entre 1 y 30 caracteres' }, { status: 400 })
     }
 
-    // Verificar email único
-    const existingEmail = await prisma.user.findUnique({ where: { email } })
-    if (existingEmail) {
-      return NextResponse.json({ error: 'Ese email ya está registrado. ¿Querés iniciar sesión?' }, { status: 409 })
-    }
-
     // Verificar username único
     const existingProfile = await prisma.profile.findUnique({
-      where: { username: username.toLowerCase() },
+      where: { username: cleanUsername },
     })
     if (existingProfile) {
       return NextResponse.json({ error: 'Ese nombre de usuario ya está en uso. ¡Elegí otro!' }, { status: 409 })
@@ -44,16 +39,13 @@ export async function POST(request: Request) {
     // Crear usuario + perfil en transacción
     const user = await prisma.$transaction(async (tx) => {
       const u = await tx.user.create({
-        data: {
-          email,
-          passwordHash,
-        },
+        data: { passwordHash },
       })
 
       await tx.profile.create({
         data: {
           id: u.id,
-          username: username.toLowerCase(),
+          username: cleanUsername,
           displayName: display_name,
         },
       })
@@ -61,8 +53,7 @@ export async function POST(request: Request) {
       return u
     })
 
-    // Iniciar sesión automáticamente
-    const token = await createSessionToken(user.id, user.email)
+    const token = await createSessionToken(user.id, cleanUsername)
     await setSessionCookie(token)
 
     return NextResponse.json({ success: true })

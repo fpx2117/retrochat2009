@@ -78,7 +78,7 @@ export default function RegisterPage() {
           <div className="text-5xl mb-4">🎉</div>
           <h2 className="text-lg font-bold text-gray-800 mb-2">¡Bienvenido/a a RetroChat!</h2>
           <p className="text-sm text-gray-600 mb-4">
-            Revisá tu email para confirmar tu cuenta. Después podrás chatear con el mundo.
+            ¡Tu cuenta fue creada! Ya podés chatear con el mundo.
           </p>
           <div className="text-2xl opacity-50 mb-4">😊 :D ❤️ xD</div>
           <Link href="/login" className="retro-btn retro-btn-primary text-sm">
@@ -154,23 +154,6 @@ export default function RegisterPage() {
                   placeholder="Como te llaman tus amigos"
                   disabled={isPending}
                   maxLength={30}
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="retro-label" htmlFor="email">
-                  📧 Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  className="retro-input"
-                  placeholder="tu@email.com"
-                  disabled={isPending}
                 />
               </div>
 

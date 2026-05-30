@@ -7,7 +7,7 @@ import { USER_STATUSES } from '@/types'
 import type { Profile, UserStatus } from '@/types'
 import { getDefaultAvatar } from '@/lib/utils'
 
-export function SettingsClient({ profile, email }: { profile: Profile; email: string }) {
+export function SettingsClient({ profile }: { profile: Profile }) {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -111,7 +111,6 @@ export function SettingsClient({ profile, email }: { profile: Profile; email: st
             <div>
               <p className="font-bold text-gray-800">{profile.display_name || profile.username}</p>
               <p className="text-xs text-gray-500">@{profile.username}</p>
-              <p className="text-xs text-gray-400">{email}</p>
               <div className="flex items-center gap-1.5 mt-1">
                 <span
                   className="status-dot"

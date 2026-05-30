@@ -9,13 +9,13 @@ const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 días
 
 export interface SessionUser {
   id: string
-  email: string
+  username: string
 }
 
 // ─── Crear y firmar JWT ──────────────────────────────────────
 
-export async function createSessionToken(userId: string, email: string): Promise<string> {
-  return new SignJWT({ sub: userId, email })
+export async function createSessionToken(userId: string, username: string): Promise<string> {
+  return new SignJWT({ sub: userId, username })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
@@ -27,8 +27,8 @@ export async function createSessionToken(userId: string, email: string): Promise
 export async function verifySessionToken(token: string): Promise<SessionUser | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET)
-    if (!payload.sub || !payload.email) return null
-    return { id: payload.sub, email: payload.email as string }
+    if (!payload.sub || !payload.username) return null
+    return { id: payload.sub, username: payload.username as string }
   } catch {
     return null
   }
@@ -45,7 +45,7 @@ export async function getSession(): Promise<SessionUser | null> {
 
 // ─── Obtener sesión con perfil ───────────────────────────────
 
-export async function getSessionWithProfile(): Promise<(SessionUser & { username: string; displayName: string; role: string }) | null> {
+export async function getSessionWithProfile(): Promise<(SessionUser & { displayName: string; role: string }) | null> {
   const session = await getSession()
   if (!session) return null
 
@@ -58,7 +58,6 @@ export async function getSessionWithProfile(): Promise<(SessionUser & { username
 
   return {
     ...session,
-    username: profile.username,
     displayName: profile.displayName,
     role: profile.role,
   }

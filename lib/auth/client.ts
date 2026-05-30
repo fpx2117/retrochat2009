@@ -1,13 +1,13 @@
 /**
  * Funciones de autenticación cliente.
- * Estas usan fetch a endpoints API en lugar de depender de Supabase.
+ * Estas usan fetch a endpoints API.
  */
 
-export async function signIn(email: string, password: string): Promise<{ error?: string }> {
+export async function signIn(username: string, password: string): Promise<{ error?: string }> {
   const res = await fetch('/api/auth/signin', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username, password }),
   })
   if (!res.ok) {
     const data = await res.json()
@@ -17,7 +17,6 @@ export async function signIn(email: string, password: string): Promise<{ error?:
 }
 
 export async function signUp(data: {
-  email: string
   password: string
   username: string
   display_name: string
@@ -38,7 +37,7 @@ export async function signOut(): Promise<void> {
   await fetch('/api/auth/signout', { method: 'POST' })
 }
 
-export async function getCurrentUser(): Promise<{ id: string; email: string; username: string; displayName: string; role: string } | null> {
+export async function getCurrentUser(): Promise<{ id: string; username: string; displayName: string; role: string } | null> {
   const res = await fetch('/api/auth/me')
   if (!res.ok) return null
   return res.json()

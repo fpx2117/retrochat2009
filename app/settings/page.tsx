@@ -18,7 +18,7 @@ export default async function SettingsPage() {
   return (
     <div className="min-h-[calc(100vh-120px)] py-8 px-4">
       <div className="max-w-lg mx-auto">
-        <SettingsClient profile={profile as any} email={session.email} />
+        <SettingsClient profile={profile as any} />
       </div>
     </div>
   )

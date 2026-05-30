@@ -42,17 +42,17 @@ export default function LoginPage() {
           <div className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="retro-label" htmlFor="email">
-                  📧 Email
+                <label className="retro-label" htmlFor="username">
+                  👤 Usuario
                 </label>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
+                  id="username"
+                  name="username"
+                  type="text"
                   required
-                  autoComplete="email"
+                  autoComplete="username"
                   className="retro-input"
-                  placeholder="tu@email.com"
+                  placeholder="Tu nombre de usuario"
                   disabled={isPending}
                 />
               </div>

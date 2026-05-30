@@ -5,23 +5,30 @@ import { createSessionToken, setSessionCookie } from '@/lib/auth'
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json()
+    const { username, password } = await request.json()
 
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email y contraseña requeridos' }, { status: 400 })
+    if (!username || !password) {
+      return NextResponse.json({ error: 'Usuario y contraseña requeridos' }, { status: 400 })
     }
 
-    const user = await prisma.user.findUnique({ where: { email } })
-    if (!user) {
-      return NextResponse.json({ error: 'Email o contraseña incorrectos' }, { status: 401 })
+    const cleanUsername = username.toLowerCase().trim()
+
+    // Buscar por username (vía Profile → User)
+    const profile = await prisma.profile.findUnique({
+      where: { username: cleanUsername },
+      select: { id: true, username: true, user: { select: { passwordHash: true } } },
+    })
+
+    if (!profile || !profile.user) {
+      return NextResponse.json({ error: 'Usuario o contraseña incorrectos' }, { status: 401 })
     }
 
-    const valid = await bcrypt.compare(password, user.passwordHash)
+    const valid = await bcrypt.compare(password, profile.user.passwordHash)
     if (!valid) {
-      return NextResponse.json({ error: 'Email o contraseña incorrectos' }, { status: 401 })
+      return NextResponse.json({ error: 'Usuario o contraseña incorrectos' }, { status: 401 })
     }
 
-    const token = await createSessionToken(user.id, user.email)
+    const token = await createSessionToken(profile.id, profile.username)
     await setSessionCookie(token)
 
     return NextResponse.json({ success: true })

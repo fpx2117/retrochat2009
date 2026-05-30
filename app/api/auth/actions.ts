@@ -7,12 +7,11 @@ import { validateUsername } from '@/lib/utils'
 import { redirect } from 'next/navigation'
 
 export async function signUp(formData: FormData) {
-  const email = formData.get('email') as string
   const password = formData.get('password') as string
   const username = (formData.get('username') as string).trim().toLowerCase()
   const displayName = (formData.get('display_name') as string).trim()
 
-  if (!email || !password || !username || !displayName) {
+  if (!password || !username || !displayName) {
     return { error: 'Todos los campos son obligatorios' }
   }
 
@@ -29,12 +28,6 @@ export async function signUp(formData: FormData) {
     return { error: 'El nombre debe tener entre 1 y 30 caracteres' }
   }
 
-  // Verificar email único
-  const existingEmail = await prisma.user.findUnique({ where: { email } })
-  if (existingEmail) {
-    return { error: 'Ese email ya está registrado. ¿Querés iniciar sesión?' }
-  }
-
   // Verificar username único
   const existingProfile = await prisma.profile.findUnique({
     where: { username },
@@ -48,7 +41,7 @@ export async function signUp(formData: FormData) {
   // Crear usuario + perfil en transacción
   const user = await prisma.$transaction(async (tx) => {
     const u = await tx.user.create({
-      data: { email, passwordHash },
+      data: { passwordHash },
     })
     await tx.profile.create({
       data: {
@@ -61,31 +54,36 @@ export async function signUp(formData: FormData) {
   })
 
   // Iniciar sesión automáticamente
-  const token = await createSessionToken(user.id, user.email)
+  const token = await createSessionToken(user.id, username)
   await setSessionCookie(token)
 
   return { success: true }
 }
 
 export async function signIn(formData: FormData) {
-  const email = formData.get('email') as string
+  const username = (formData.get('username') as string).trim().toLowerCase()
   const password = formData.get('password') as string
 
-  if (!email || !password) {
-    return { error: 'Completá email y contraseña' }
+  if (!username || !password) {
+    return { error: 'Completá usuario y contraseña' }
   }
 
-  const user = await prisma.user.findUnique({ where: { email } })
-  if (!user) {
-    return { error: 'Email o contraseña incorrectos' }
+  // Buscar por username (vía Profile → User)
+  const profile = await prisma.profile.findUnique({
+    where: { username },
+    select: { id: true, username: true, user: { select: { passwordHash: true } } },
+  })
+
+  if (!profile || !profile.user) {
+    return { error: 'Usuario o contraseña incorrectos' }
   }
 
-  const valid = await bcrypt.compare(password, user.passwordHash)
+  const valid = await bcrypt.compare(password, profile.user.passwordHash)
   if (!valid) {
-    return { error: 'Email o contraseña incorrectos' }
+    return { error: 'Usuario o contraseña incorrectos' }
   }
 
-  const token = await createSessionToken(user.id, user.email)
+  const token = await createSessionToken(profile.id, profile.username)
   await setSessionCookie(token)
 
   redirect('/rooms')
