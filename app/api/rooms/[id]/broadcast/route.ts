@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db/prisma'
 import { getSessionFromCookies } from '@/lib/auth'
+import { broadcastStore } from '@/lib/broadcast-store'
 
 /**
  * Broadcast endpoint: recibe eventos de typing y buzz y los transmite
@@ -11,9 +11,6 @@ import { getSessionFromCookies } from '@/lib/auth'
  *
  * En el futuro, esto se conecta a un WebSocket server.
  */
-
-// Store en memoria para broadcast events (MVP)
-const broadcastStore = new Map<string, any[]>()
 
 export async function POST(
   request: NextRequest,
@@ -30,17 +27,7 @@ export async function POST(
     const { type, userId, username } = body
 
     const event = { type, userId, username, timestamp: Date.now() }
-
-    if (!broadcastStore.has(roomId)) {
-      broadcastStore.set(roomId, [])
-    }
-    broadcastStore.get(roomId)!.push(event)
-
-    // Limpiar eventos viejos (> 10s)
-    broadcastStore.set(
-      roomId,
-      broadcastStore.get(roomId)!.filter(e => Date.now() - e.timestamp < 10000)
-    )
+    broadcastStore.push(roomId, event)
 
     return NextResponse.json({ success: true, event })
   } catch {
@@ -53,10 +40,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: roomId } = await params
-
-  const events = broadcastStore.get(roomId) || []
-  // Limpiar viejos
-  broadcastStore.set(roomId, events.filter(e => Date.now() - e.timestamp < 10000))
-
+  const events = broadcastStore.getAll(roomId)
   return NextResponse.json({ events })
 }

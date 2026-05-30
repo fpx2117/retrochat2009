@@ -10,6 +10,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { EmojiPicker } from '@/components/chat/EmojiPicker'
 import { getCurrentUser } from '@/lib/auth/client'
+import { playMsnBuzz } from '@/lib/audio'
 import type { UserStatus } from '@/types'
 import { USER_STATUSES } from '@/types'
 
@@ -128,6 +129,27 @@ export function ChatRoom({
         setMessages(prev => prev.map(m =>
           m.id === data.id ? { ...m, deleted_at: data.deletedAt } : m
         ))
+      } catch {}
+    })
+
+    es.addEventListener('buzz', (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data)
+        if (data.userId !== currentUser?.id) {
+          // Recibir zumbido de otro usuario
+          setBuzzing(true)
+          setTimeout(() => setBuzzing(false), 1000)
+          playMsnBuzz()
+          const buzzMsg = {
+            id: `buzz-${Date.now()}`,
+            content: `🔔 ¡${data.username} envió un zumbido!`,
+            is_system: true,
+            created_at: new Date().toISOString(),
+            user_id: null,
+            profiles: null,
+          }
+          setMessages(prev => [...prev, buzzMsg])
+        }
       } catch {}
     })
 
@@ -259,6 +281,7 @@ export function ChatRoom({
 
     setBuzzing(true)
     setTimeout(() => setBuzzing(false), 1000)
+    playMsnBuzz()
 
     const buzzMsg = {
       id: `buzz-sent-${Date.now()}`,

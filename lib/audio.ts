@@ -33,3 +33,27 @@ export function playMsnBeep() {
     // Silenciar errores (mobile, permisos, etc.)
   }
 }
+
+// Sonido de zumbido MSN — vibración rápida
+export function playMsnBuzz() {
+  try {
+    const ctx = getAudioContext()
+    const duration = 0.6
+    const now = ctx.currentTime
+
+    for (let i = 0; i < 6; i++) {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.type = 'square'
+      osc.frequency.setValueAtTime(80 + i * 30, now + i * 0.1)
+      gain.gain.setValueAtTime(0.08, now + i * 0.1)
+      gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.08)
+      osc.start(now + i * 0.1)
+      osc.stop(now + i * 0.1 + 0.08)
+    }
+  } catch {
+    // Silenciar errores
+  }
+}

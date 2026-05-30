@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
+import { broadcastStore } from '@/lib/broadcast-store'
 
 /**
  * SSE Endpoint para eventos en tiempo real de una sala.
@@ -23,6 +24,7 @@ export async function GET(
   // Crear stream SSE
   const encoder = new TextEncoder()
   let lastCheckedId = lastMessageId || ''
+  let lastBuzzTimestamp = Date.now()
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -79,6 +81,15 @@ export async function GET(
                 `event: message_deleted\ndata: ${JSON.stringify({ id: dm.id, deletedAt: dm.deletedAt?.toISOString() })}\n\n`
               ))
             }
+          }
+
+          // Emitir zumbidos
+          const buzzEvents = broadcastStore.getSince(roomId, lastBuzzTimestamp)
+          lastBuzzTimestamp = Date.now()
+          for (const be of buzzEvents) {
+            controller.enqueue(encoder.encode(
+              `event: buzz\ndata: ${JSON.stringify(be)}\n\n`
+            ))
           }
 
           // Heartbeat
