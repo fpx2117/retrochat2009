@@ -208,7 +208,6 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
               }
             }}
             disabled={isSending}
-            maxLength={500}
             autoFocus
           />
           <button
@@ -220,7 +219,7 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
           </button>
         </form>
         <div className="text-xs text-gray-400 mt-0.5">
-          {inputValue.length > 0 ? `${inputValue.length}/500` : '😊 :D :P xD ;) ❤️'}
+          {inputValue.length > 0 ? `${inputValue.length}/5000` : '😊 :D :P xD ;) ❤️'}
         </div>
       </div>
     </div>

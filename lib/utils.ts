@@ -11,8 +11,7 @@ import { EMOTICONS } from '@/types'
  * Para ASCII art, se preserva el texto crudo.
  */
 export function sanitizeMessage(content: string): string {
-  const trimmed = content.trim().slice(0, 500)
-  // Para ASCII art no tocamos nada
+  const trimmed = content.trim().slice(0, 5000)
   if (isAsciiArt(trimmed)) return trimmed
   return trimmed
 }

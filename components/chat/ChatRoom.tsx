@@ -589,7 +589,6 @@ export function ChatRoom({
                 }
               }}
               disabled={isSending || !currentMember}
-              maxLength={500}
               autoFocus
             />
             <button
@@ -604,7 +603,7 @@ export function ChatRoom({
           </form>
           <div className="flex items-center justify-between mt-1">
             <div className="text-xs text-gray-400">
-              {inputValue.length > 0 && `${inputValue.length}/500`}
+              {inputValue.length > 0 && `${inputValue.length}/5000`}
               {inputValue.length === 0 && '😊 :D :P xD ;) :( ❤️ • /me /clear /rules'}
             </div>
           </div>
