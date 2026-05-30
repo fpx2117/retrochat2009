@@ -47,6 +47,7 @@ export function ChatRoom({
   const [hasMoreMessages, setHasMoreMessages] = useState(initialMessages.length === 30)
   const [loadingMore, setLoadingMore] = useState(false)
   const [passwordInput, setPasswordInput] = useState('')
+  const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg'>('sm')
   const [needsPassword] = useState(room.is_private && !initialMember)
   const [joiningRoom, setJoiningRoom] = useState(false)
   const [joinError, setJoinError] = useState<string | null>(null)
@@ -465,6 +466,21 @@ export function ChatRoom({
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Tamaño letra */}
+            <div className="flex items-center gap-0.5">
+              <button
+                onClick={() => setFontSize(fontSize === 'lg' ? 'base' : fontSize === 'base' ? 'sm' : 'sm')}
+                disabled={fontSize === 'sm'}
+                className="retro-btn retro-btn-secondary text-xs px-1.5"
+                title="Letra más chica"
+              >A-</button>
+              <button
+                onClick={() => setFontSize(fontSize === 'sm' ? 'base' : fontSize === 'base' ? 'lg' : 'lg')}
+                disabled={fontSize === 'lg'}
+                className="retro-btn retro-btn-secondary text-xs px-1.5"
+                title="Letra más grande"
+              >A+</button>
+            </div>
             <button
               onClick={handleBuzz}
               disabled={buzzCooldown || !currentMember}
@@ -538,6 +554,7 @@ export function ChatRoom({
               onBan={(userId, username) => setConfirmBan({ userId, username })}
               onContextMenu={(x, y, message) => setContextMenu({ x, y, message })}
               isNew={idx >= visibleMessages.length - 5}
+              fontSize={fontSize}
             />
           ))}
 
@@ -748,17 +765,19 @@ function MessageItem({
   onBan,
   onContextMenu,
   isNew,
+  fontSize = 'sm' as 'sm' | 'base' | 'lg',
 }: {
   message: any
-  currentUserId?: string
+  currentUserId: string | null
   canModerate: boolean
   isBlocked: boolean
   onDelete: () => void
-  onReport: (msgId: string, userId: string) => void
+  onReport: (messageId: string, userId: string) => void
   onBlock: (userId: string) => void
   onBan: (userId: string, username: string) => void
-  onContextMenu: (x: number, y: number, message: any) => void
+  onContextMenu: (e: React.MouseEvent, messageId: string, userId: string) => void
   isNew: boolean
+  fontSize?: 'sm' | 'base' | 'lg'
 }) {
   if (message.is_system) {
     return <div className="chat-message system">{message.content}</div>
@@ -806,7 +825,7 @@ function MessageItem({
             </span>
           </div>
 
-          <div className={`text-sm text-gray-800 whitespace-pre-wrap break-words ${
+          <div className={`${fontSize === 'sm' ? 'text-xs' : fontSize === 'base' ? 'text-sm' : 'text-base'} text-gray-800 whitespace-pre-wrap break-words ${
             isAsciiArt(message.content) ? 'font-mono' : ''
           }`}>
             {content}
