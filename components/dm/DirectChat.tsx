@@ -74,10 +74,34 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
     setIsSending(true)
     setError(null)
 
+    // Agregar optimistamente al estado local
+    const tempId = `temp-${Date.now()}`
+    const optimisticMsg = {
+      id: tempId,
+      senderId: currentUser.id,
+      content,
+      createdAt: new Date().toISOString(),
+      sender: { id: currentUser.id, username: currentUser.username, displayName: currentUser.displayName },
+    }
+    setMessages(prev => [...prev, optimisticMsg])
+
     const result = await sendDirectMessage(otherUser.id, content)
     if (result.error) {
       setError(result.error)
       setInputValue(content)
+      // Remover mensaje optimista fallido
+      setMessages(prev => prev.filter(m => m.id !== tempId))
+    } else if (result.message) {
+      // Reemplazar mensaje optimista con el real de la DB
+      setMessages(prev => prev.map(m =>
+        m.id === tempId ? {
+          id: result.message.id,
+          senderId: result.message.senderId,
+          content: result.message.content,
+          createdAt: result.message.createdAt,
+          sender: result.message.sender,
+        } : m
+      ))
     }
     setIsSending(false)
     inputRef.current?.focus()
