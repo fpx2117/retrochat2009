@@ -6,23 +6,23 @@ import { EMOTICONS } from '@/types'
  * NO usa DOMPurify en servidor (solo cliente), usa escape manual server-side.
  */
 export function sanitizeMessage(content: string): string {
-  // Trim y límite de longitud
   const trimmed = content.trim().slice(0, 500)
-
-  // Escape de caracteres HTML peligrosos
+  // No sanitizar ASCII art — preservar caracteres especiales
+  if (isAsciiArt(trimmed)) return trimmed
+  // Escape mínimo de HTML (solo lo peligroso)
   return trimmed
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;')
 }
 
 /**
  * Convierte emoticones de texto a emojis unicode
  */
 export function convertEmoticons(text: string): string {
+  // No convertir emoticones en ASCII art
+  if (isAsciiArt(text)) return text
   let result = text
   // Ordenar por longitud descendente para evitar reemplazos parciales
   const sorted = Object.entries(EMOTICONS).sort(([a], [b]) => b.length - a.length)
