@@ -5,16 +5,16 @@ import { EMOTICONS } from '@/types'
  * y convierte caracteres especiales a entidades HTML.
  * NO usa DOMPurify en servidor (solo cliente), usa escape manual server-side.
  */
+/**
+ * Sanitiza el contenido de un mensaje: trim y límite de longitud.
+ * React escapa XSS automáticamente al renderizar {text}.
+ * Para ASCII art, se preserva el texto crudo.
+ */
 export function sanitizeMessage(content: string): string {
   const trimmed = content.trim().slice(0, 500)
-  // No sanitizar ASCII art — preservar caracteres especiales
+  // Para ASCII art no tocamos nada
   if (isAsciiArt(trimmed)) return trimmed
-  // Escape mínimo de HTML (solo lo peligroso)
   return trimmed
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
 }
 
 /**
