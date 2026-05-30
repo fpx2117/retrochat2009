@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { sendMessage, deleteMessage, loadMoreMessages, reportContent, blockUser } from '@/app/api/messages/actions'
 import { joinRoom, leaveRoom, banUser, promoteToModerator, closeRoom } from '@/app/api/rooms/actions'
-import { convertEmoticons, formatMessageTime, formatRelativeTime, parseCommand } from '@/lib/utils'
+import { convertEmoticons, formatMessageTime, formatRelativeTime, parseCommand, isAsciiArt } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { EmojiPicker } from '@/components/chat/EmojiPicker'
@@ -784,7 +784,9 @@ function MessageItem({
             </span>
           </div>
 
-          <div className="text-xs text-gray-800 break-words">
+          <div className={`text-xs text-gray-800 whitespace-pre-wrap break-words ${
+            isAsciiArt(message.content) ? 'font-mono' : ''
+          }`}>
             {content}
           </div>
         </div>

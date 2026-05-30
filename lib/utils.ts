@@ -136,6 +136,18 @@ export function createThrottle(ms: number) {
 }
 
 /**
+ * Detecta ASCII art: múltiples líneas con caracteres especiales (¶ ø ¢ $ ´ etc.)
+ */
+export function isAsciiArt(content: string): boolean {
+  if (!content) return false
+  const lines = content.split('\n')
+  if (lines.length < 3) return false
+  const asciiChars = /[´`¶ø¢$▀▄█▌▐░▒▓■□▪▫●○◘◙◦♠♣♥♦♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼]/
+  const artLines = lines.filter(l => asciiChars.test(l)).length
+  return artLines >= lines.length * 0.3 || lines.length >= 6
+}
+
+/**
  * Genera un avatar URL por defecto basado en el username
  * Usa DiceBear para avatares únicos
  */
