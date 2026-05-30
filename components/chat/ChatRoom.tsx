@@ -775,7 +775,7 @@ function MessageItem({
   onReport: (messageId: string, userId: string) => void
   onBlock: (userId: string) => void
   onBan: (userId: string, username: string) => void
-  onContextMenu: (e: React.MouseEvent, messageId: string, userId: string) => void
+  onContextMenu: (x: number, y: number, message: any) => void
   isNew: boolean
   fontSize?: 'sm' | 'base' | 'lg'
 }) {
