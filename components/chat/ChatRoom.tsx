@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { sendMessage, deleteMessage, loadMoreMessages, reportContent, blockUser } from '@/app/api/messages/actions'
 import { joinRoom, leaveRoom, banUser, promoteToModerator, closeRoom } from '@/app/api/rooms/actions'
-import { convertEmoticons, formatMessageTime, formatRelativeTime, parseCommand, isAsciiArt } from '@/lib/utils'
+import { convertEmoticons, formatMessageTime, formatRelativeTime, parseCommand, isAsciiArt, processMessageContent } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { EmojiPicker } from '@/components/chat/EmojiPicker'
@@ -877,7 +877,7 @@ function MessageItem({
   }
 
   const isOwn = message.user_id === currentUserId
-  const content = convertEmoticons(message.content)
+  const content = processMessageContent(message.content)
   const profile = message.profile || message.profiles
 
   return (
@@ -910,11 +910,12 @@ function MessageItem({
             </span>
           </div>
 
-          <div className={`${fontSize === 'xs' ? 'text-xs' : fontSize === 'sm' ? 'text-sm' : fontSize === 'base' ? 'text-base' : fontSize === 'lg' ? 'text-lg' : 'text-xl'} text-gray-800 whitespace-pre-wrap break-words ${
-            isAsciiArt(message.content) ? 'font-mono' : ''
-          }`}>
-            {content}
-          </div>
+          <div
+            className={`${fontSize === 'xs' ? 'text-xs' : fontSize === 'sm' ? 'text-sm' : fontSize === 'base' ? 'text-base' : fontSize === 'lg' ? 'text-lg' : 'text-xl'} text-gray-800 whitespace-pre-wrap break-words ${
+              isAsciiArt(message.content) ? 'font-mono' : ''
+            }`}
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
         </div>
 
         <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { sendDirectMessage, getConversation, markAsRead } from '@/app/api/dm/actions'
-import { convertEmoticons, formatMessageTime, isAsciiArt } from '@/lib/utils'
+import { convertEmoticons, formatMessageTime, isAsciiArt, processMessageContent } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
 import { EmojiPicker } from '@/components/chat/EmojiPicker'
 
@@ -171,7 +171,7 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
           messages.map(msg => {
             const isOwn = msg.senderId === currentUser.id || msg.sender?.id === currentUser.id
             const sender = msg.sender || {}
-            const content = convertEmoticons(msg.content)
+            const content = processMessageContent(msg.content)
 
             return (
               <div key={msg.id} className={`flex mb-1.5 ${isOwn ? 'justify-end' : 'justify-start'}`}>
@@ -194,9 +194,9 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
                     isOwn
                       ? 'bg-blue-400 text-white rounded-br-sm'
                       : 'bg-white border border-gray-200 rounded-bl-sm shadow-sm'
-                  }`}>
-                    {content}
-                  </div>
+                  }`}
+                    dangerouslySetInnerHTML={{ __html: content }}
+                  />
                   <div className={`text-xs text-gray-400 mt-0.5 ${isOwn ? 'text-right mr-1' : 'ml-1'}`}>
                     {formatMessageTime(msg.createdAt || msg.created_at)}
                   </div>

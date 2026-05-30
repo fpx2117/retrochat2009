@@ -22,16 +22,54 @@ export function sanitizeMessage(content: string): string {
 export function convertEmoticons(text: string): string {
   // No convertir emoticones en ASCII art
   if (isAsciiArt(text)) return text
-  let result = text
-  // Ordenar por longitud descendente para evitar reemplazos parciales
-  const sorted = Object.entries(EMOTICONS).sort(([a], [b]) => b.length - a.length)
+  return convertEmoticonsOnly(text)
+}
 
+function convertEmoticonsOnly(text: string): string {
+  let result = text
+  const sorted = Object.entries(EMOTICONS).sort(([a], [b]) => b.length - a.length)
   for (const [emoticon, emoji] of sorted) {
-    // Escapar caracteres especiales para regex
     const escaped = emoticon.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     result = result.replace(new RegExp(escaped, 'g'), emoji)
   }
   return result
+}
+
+/**
+ * Procesa mensaje para display: URLs cliqueables, emoticones en texto normal.
+ * Retorna HTML seguro para dangerouslySetInnerHTML.
+ */
+export function processMessageContent(text: string): string {
+  if (isAsciiArt(text)) {
+    // ASCII art: escapar HTML y preservar
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  }
+
+  // Regex para detectar URLs
+  const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]+)/gi
+
+  // Dividir texto en partes: URLs y no-URLs
+  const parts: string[] = []
+  let lastIndex = 0
+  let match
+
+  while ((match = urlRegex.exec(text)) !== null) {
+    // Texto antes de la URL
+    if (match.index > lastIndex) {
+      parts.push(convertEmoticonsOnly(text.slice(lastIndex, match.index)))
+    }
+    // La URL como link
+    const url = match[0]
+    parts.push(`<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`)
+    lastIndex = urlRegex.lastIndex
+  }
+
+  // Texto restante después de la última URL
+  if (lastIndex < text.length) {
+    parts.push(convertEmoticonsOnly(text.slice(lastIndex)))
+  }
+
+  return parts.length > 0 ? parts.join('') : convertEmoticonsOnly(text)
 }
 
 /**
