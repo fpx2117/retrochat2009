@@ -57,8 +57,9 @@ export function ChatRoom({
   const [joinError, setJoinError] = useState<string | null>(null)
   const [buzzCooldown, setBuzzCooldown] = useState(false)
   const [buzzing, setBuzzing] = useState(false)
-  const [localClearCount, setLocalClearCount] = useState(0)
+  const [clearedBefore, setClearedBefore] = useState<Date | null>(null)
   const [showRules, setShowRules] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const [contextMenu, setContextMenu] = useState<{
     x: number; y: number; message: any
   } | null>(null)
@@ -241,11 +242,41 @@ export function ChatRoom({
 
     if (isCommand) {
       if (command === 'clear') {
-        setLocalClearCount(c => c + 1)
+        setClearedBefore(new Date())
+        setMessages([])
+        return
+      }
+      if (command === 'help') {
+        setShowHelp(true)
         return
       }
       if (command === 'rules') {
         setShowRules(true)
+        return
+      }
+      if (command === 'topic') {
+        const topicMsg = {
+          id: `system-${Date.now()}`,
+          content: `📌 ${room.name}: ${room.description || 'Sin descripción'} — ${members.length} miembros — ${room.category}`,
+          is_system: true,
+          created_at: new Date().toISOString(),
+          user_id: null,
+          profiles: null,
+        }
+        setMessages(prev => [...prev, topicMsg])
+        return
+      }
+      if (command === 'online') {
+        const onlineCount = members.filter((m: any) => m.profile?.status === 'online').length
+        const onlineMsg = {
+          id: `system-${Date.now()}`,
+          content: `🟢 ${onlineCount} de ${members.length} usuarios están online`,
+          is_system: true,
+          created_at: new Date().toISOString(),
+          user_id: null,
+          profiles: null,
+        }
+        setMessages(prev => [...prev, onlineMsg])
         return
       }
       if (command === 'me' && args) {
@@ -391,10 +422,7 @@ export function ChatRoom({
   const isOwner = currentMember?.role === 'owner'
 
   // Filtrar mensajes
-  const visibleMessages = messages.filter((_msg, idx) => {
-    if (localClearCount > 0 && idx < messages.length - 50) return false
-    return true
-  })
+  const visibleMessages = messages
 
   // ─── Pantalla de acceso ─────────────────────────────────────
 
@@ -770,6 +798,29 @@ export function ChatRoom({
               <li>Los reportes son anónimos y se revisan en 24hs.</li>
             </ul>
             <button onClick={() => setShowRules(false)} className="retro-btn retro-btn-primary text-xs w-full mt-4">
+              Entendido ✓
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showHelp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowHelp(false)} />
+          <div className="relative retro-panel max-w-sm w-full mx-4 p-5">
+            <div className="retro-header -m-5 mb-4 px-4 py-2 rounded-t-lg">
+              <span className="text-white text-xs font-bold">💡 Comandos disponibles</span>
+            </div>
+            <div className="text-xs text-gray-700 space-y-1.5">
+              <p><strong>/help</strong> — Mostrar esta ayuda</p>
+              <p><strong>/clear</strong> — Limpiar la pantalla del chat</p>
+              <p><strong>/rules</strong> — Ver reglas de la sala</p>
+              <p><strong>/me texto</strong> — Acción (ej: /me baila)</p>
+              <p><strong>/msg usuario texto</strong> — Mensaje privado</p>
+              <p><strong>/topic</strong> — Info de la sala</p>
+              <p><strong>/online</strong> — Usuarios conectados</p>
+            </div>
+            <button onClick={() => setShowHelp(false)} className="retro-btn retro-btn-primary text-xs w-full mt-4">
               Entendido ✓
             </button>
           </div>
