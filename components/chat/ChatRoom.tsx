@@ -269,7 +269,7 @@ export function ChatRoom({
     }
 
     setIsSending(false)
-    inputRef.current?.focus()
+    setTimeout(() => inputRef.current?.focus(), 0)
   }
 
   // ─── Zumbido ────────────────────────────────────────────────
