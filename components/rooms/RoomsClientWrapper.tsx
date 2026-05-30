@@ -122,7 +122,7 @@ export function RoomsClientWrapper({
 }
 
 function RoomCard({ room }: { room: Room }) {
-  const isNew = room.created_at > new Date(Date.now() - 86400000).toISOString()
+  const isNew = (room.created_at || (room as any).createdAt) > new Date(Date.now() - 86400000).toISOString()
 
   return (
     <Link href={`/rooms/${room.id}`} className="block">
@@ -150,7 +150,7 @@ function RoomCard({ room }: { room: Room }) {
         {/* Metadata */}
         <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
           <span className="truncate">👤 {room.profiles?.username || 'desconocido'}</span>
-          <span className="flex-shrink-0">{formatRelativeTime(room.created_at)}</span>
+          <span className="flex-shrink-0">{formatRelativeTime(room.created_at || (room as any).createdAt)}</span>
         </div>
 
         {/* Tags */}

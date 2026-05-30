@@ -103,7 +103,7 @@ export function AdminClient({ reports: initialReports, stats }: { reports: Repor
                       </div>
                     )}
 
-                    <p className="text-xs text-gray-400">{formatRelativeTime(report.created_at)}</p>
+                    <p className="text-xs text-gray-400">{formatRelativeTime(report.created_at || (report as any).createdAt)}</p>
                   </div>
 
                   <div className="flex flex-col gap-1.5 flex-shrink-0">

@@ -76,6 +76,7 @@ export function generateSlug(name: string): string {
  */
 export function formatRelativeTime(dateStr: string): string {
   const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return '--'
   const now = new Date()
   const diff = now.getTime() - date.getTime()
 
@@ -100,7 +101,10 @@ export function formatRelativeTime(dateStr: string): string {
  * Formatea hora de mensaje HH:mm
  */
 export function formatMessageTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleTimeString('es-AR', {
+  if (!dateStr) return '--:--'
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return '--:--'
+  return date.toLocaleTimeString('es-AR', {
     hour: '2-digit',
     minute: '2-digit',
   })

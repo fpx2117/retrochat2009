@@ -776,7 +776,7 @@ function MessageItem({
               {profile?.displayName || profile?.display_name || profile?.username || 'Sistema'}
             </span>
             <span className="text-gray-400 text-xs">
-              {formatMessageTime(message.created_at)}
+              {formatMessageTime(message.createdAt || message.created_at)}
             </span>
           </div>
 
