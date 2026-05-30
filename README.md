@@ -1,39 +1,104 @@
 # 💬 RetroChat 2009
 
-> El chat de salas más nostálgico de la web moderna. Estética 2009, tecnología 2024.
+> El chat de salas más nostálgico de la web. Estética MSN Messenger 2009, tecnología 2026.
 
-**RetroChat 2009** es una aplicación web de chat con salas en tiempo real, inspirada visualmente en las plataformas sociales del año 2009: MSN Messenger, IRC, foros, salas de chat web. Construida con Next.js, TypeScript, Tailwind CSS y Supabase.
+**RetroChat 2009** es una aplicación de chat con salas en tiempo real, inspirada en MSN Messenger, IRC, MetroFLOG y las salas de chat de los 2000. Construida con Next.js 16, TypeScript, Prisma, PostgreSQL y JWT.
 
 ---
 
 ## ✨ Funcionalidades
 
-- **Autenticación completa**: Registro, login, logout, perfil público
-- **Salas de chat**: Públicas y privadas (con contraseña), creación, listado, búsqueda
-- **Chat en tiempo real**: Mensajes instantáneos con Supabase Realtime
-- **Presencia de usuarios**: Online, Ausente, Ocupado, Invisible
+### 🔐 Autenticación 2009
+- Registro solo con **usuario + contraseña** (sin email, como en la época)
+- Login con username, JWT con cookie `rc_session`
+- Roles: usuario, moderador, admin global
+- Cambio de contraseña y eliminación de cuenta
+
+### 💬 Chat en Tiempo Real
+- **SSE (Server-Sent Events)** para mensajes instantáneos, presencia y zumbidos
 - **Typing indicators**: "Alguien está escribiendo…"
-- **Emoticones clásicos**: `:)` → 😊, `:D` → 😄, `<3` → ❤️, etc.
-- **Comandos IRC**: `/me acción`, `/clear`, `/rules`
-- **Botón Zumbido**: Con cooldown de 30 segundos
-- **Moderación**: Expulsar usuarios, eliminar mensajes, nombrar moderadores
-- **Reportes y bloqueos**: Sistema completo de reporte y bloqueo de usuarios
-- **Roles**: Usuario, Moderador de sala, Creador, Admin global
-- **Panel Admin**: Ver y resolver reportes, stats globales
-- **Diseño 2009**: Gradientes, botones brillantes, badges, avatares, estética retro
+- Mensajes con scroll infinito (carga 30 por lote)
+- Soft delete de mensajes (moderadores/owner)
+
+### 👥 Salas
+- Públicas y privadas (con contraseña hasheada bcrypt)
+- Categorías: general, música, tecnología, juegos, deportes, random
+- Sidebar de usuarios con estados (online, away, busy, invisible)
+- **Owner** puede: editar sala, banear usuarios, promover moderadores, **cerrar sala**
+- **Moderador** puede: banear, eliminar mensajes
+- `/rooms/[id]/settings` para configurar sala
+
+### 👤 Perfil Social
+- Perfil público con avatar, bio, estado, salas
+- **Sistema de amigos** bidireccional: enviar, aceptar, rechazar, eliminar
+- Badge de solicitudes pendientes en el Header
+
+### 💬 Mensajes Privados MSN-Style
+- **Ventana popup** 400x500 estilo MSN Messenger
+- **Barra de notificación amarilla** parpadeante al recibir mensaje
+- **Sonido MSN** al recibir DM (beep) y zumbido (buzz)
+- **Título parpadeante** cuando la pestaña está en segundo plano
+- Comando `/msg usuario texto`
+- Chat privado con SSE en tiempo real
+- Lista de conversaciones en `/messages`
+
+### 😊 Emoticones 2009 (45+)
+`:D` `:)` `:P` `;)` `:(` `xD` `<3` `:O` `:S` `:/` `:*` `B)` `O:)` `3:)` `>:(` `^_^` `-_-` `:3` `:v` `:$` `:@` `:'(` `(Y)` `(N)` y más
+
+### 🎸 ASCII Art
+- Detección automática de arte ASCII (monospace + pre-wrap)
+- Sin escape de caracteres especiales (`/`, `\`, `¶`, `ø`, `¢`)
+- Soporte para mensajes de hasta 5000 caracteres
+
+### ⌨️ Comandos IRC
+| Comando | Descripción |
+|---|---|
+| `/help` | Mostrar todos los comandos |
+| `/clear` | Limpiar pantalla del chat |
+| `/rules` | Reglas de la sala |
+| `/me texto` | Acción (`* pepe baila`) |
+| `/msg usuario texto` | Mensaje privado (abre popup) |
+| `/topic` | Info de la sala |
+| `/online` | Usuarios conectados |
+
+### 🔔 Zumbido MSN
+- Botón 🔔 con cooldown de 30s
+- Sonido vibrante (Web Audio API)
+- Animación de pantalla para todos los usuarios
+- Mensaje sistema: "🔔 ¡Pepe envió un zumbido!"
+
+### 🔗 URLs Cliqueables
+- Detección automática de links
+- Emoticones no se aplican dentro de URLs
+- `target="_blank"` con `rel="noopener noreferrer"`
+
+### 🎨 Customización
+- **Zoom de letra**: 5 niveles (xs → xl) con botones A-/A+
+- **Auto-focus**: cualquier tecla enfoca el chat
+- **Shift+Enter**: salto de línea en mensajes
+- Estados de usuario personalizables
+
+### 🛡️ Moderación
+- Reportes anónimos con panel admin
+- Bloqueo de usuarios
+- Ban de sala (permanente)
+- Soft delete de mensajes
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
 | Capa | Tecnología |
-|------|-----------|
-| Frontend | Next.js 16 (App Router) + TypeScript |
-| Estilos | Tailwind CSS v4 + CSS custom (estética retro) |
-| Backend | Supabase (PostgreSQL + Auth + Realtime) |
-| Deploy | Vercel + Supabase |
-| Estado | React state + Supabase Realtime |
-| Seguridad | Row Level Security (RLS) + bcryptjs + sanitización |
+|---|---|
+| Frontend | Next.js 16 (App Router + Route Groups) + TypeScript |
+| Estilos | Tailwind CSS v4 + CSS custom (estética retro 2009) |
+| Base de Datos | PostgreSQL en Railway |
+| ORM | **Prisma** v6 (schema, migrations, db push) |
+| Autenticación | **JWT** con `jose` + cookies httpOnly |
+| Tiempo Real | **SSE** (Server-Sent Events) con polling 3s |
+| Sonido | **Web Audio API** (beep MSN + zumbido) |
+| Deploy | **Railway** |
+| Seguridad | bcryptjs + validación server-side + headers HTTP |
 
 ---
 
@@ -42,253 +107,146 @@
 ```
 chat.com/
 ├── app/
-│   ├── layout.tsx              # Layout principal con Header/Footer
-│   ├── page.tsx                # Home/Landing page
-│   ├── login/page.tsx          # Login
-│   ├── register/page.tsx       # Registro
-│   ├── rooms/
-│   │   ├── page.tsx            # Listado de salas
-│   │   ├── new/page.tsx        # Crear sala
-│   │   └── [id]/page.tsx       # Chat de sala
-│   ├── profile/[username]/     # Perfil público
-│   ├── settings/page.tsx       # Configuración de perfil
-│   ├── admin/page.tsx          # Panel admin
+│   ├── layout.tsx                    # Root layout (html/body)
+│   ├── globals.css                   # Estilos retro 2009
+│   ├── (main)/                       # Route Group: layout con Header/Footer
+│   │   ├── layout.tsx                # Header + Footer + TitleBlink
+│   │   ├── page.tsx                  # Landing page
+│   │   ├── login/page.tsx            # Login (username + contraseña)
+│   │   ├── register/page.tsx         # Registro (sin email)
+│   │   ├── rooms/
+│   │   │   ├── page.tsx              # Listado de salas
+│   │   │   ├── new/page.tsx          # Crear sala
+│   │   │   └── [id]/
+│   │   │       ├── page.tsx          # Chat de sala
+│   │   │       └── settings/page.tsx # Config de sala (owner)
+│   │   ├── profile/[username]/       # Perfil público + amigos
+│   │   ├── messages/page.tsx         # Lista de conversaciones
+│   │   ├── settings/page.tsx         # Config de cuenta
+│   │   └── admin/page.tsx            # Panel admin
+│   ├── (chat)/                       # Route Group: layout SIN Header/Footer
+│   │   └── messages/[username]/      # Chat privado (popup MSN)
 │   └── api/
-│       ├── auth/actions.ts     # Server Actions: auth
-│       ├── rooms/actions.ts    # Server Actions: salas
-│       ├── messages/actions.ts # Server Actions: mensajes
-│       └── profile/actions.ts  # Server Actions: perfil
+│       ├── auth/                     # Auth (signup, signin, me, actions)
+│       ├── rooms/                    # Salas (actions, events SSE, broadcast)
+│       ├── messages/                 # Mensajes de sala (actions)
+│       ├── dm/                       # Mensajes privados (actions, events SSE)
+│       ├── friends/                  # Sistema de amigos (actions)
+│       └── profile/                  # Perfil (update, changePassword, deleteAccount)
 ├── components/
 │   ├── layout/
-│   │   ├── Header.tsx          # Header con nav y usuario
-│   │   └── Footer.tsx          # Footer retro
+│   │   ├── Header.tsx                # Nav, usuario, badge amigos/DMs, notificación MSN
+│   │   ├── Footer.tsx                # Footer retro
+│   │   └── TitleBlink.tsx            # Parpadeo de título + init audio
 │   ├── ui/
-│   │   ├── Avatar.tsx          # Componente de avatar
-│   │   ├── ConfirmDialog.tsx   # Dialog de confirmación
-│   │   └── Toaster.tsx         # Sistema de notificaciones
+│   │   ├── Avatar.tsx                # Avatar con DiceBear fallback
+│   │   ├── ConfirmDialog.tsx         # Dialog de confirmación
+│   │   └── Toaster.tsx               # Notificaciones toast
 │   ├── chat/
-│   │   └── ChatRoom.tsx        # Componente principal de chat
+│   │   ├── ChatRoom.tsx              # Chat principal (1000+ líneas)
+│   │   └── EmojiPicker.tsx           # Picker de emoticones 2009
+│   ├── dm/
+│   │   └── DirectChat.tsx            # Chat privado MSN-Style
+│   ├── profile/
+│   │   └── ProfileClient.tsx         # Botones de amistad contextuales
 │   ├── rooms/
-│   │   └── RoomsClientWrapper.tsx  # Listado de salas con filtros
+│   │   └── RoomSettingsClient.tsx    # Form editar sala + baneados
 │   ├── auth/
-│   │   └── SettingsClient.tsx  # Formulario de configuración
+│   │   └── SettingsClient.tsx        # Perfil, seguridad, zona peligro
 │   └── admin/
-│       └── AdminClient.tsx     # Panel admin
+│       └── AdminClient.tsx           # Panel admin
 ├── lib/
-│   ├── supabase/
-│   │   ├── client.ts           # Supabase client (browser)
-│   │   ├── server.ts           # Supabase client (servidor)
-│   │   └── middleware.ts       # Actualización de sesión en middleware
-│   └── utils.ts                # Utilidades: sanitización, slugs, emoticones
-├── types/index.ts              # Tipos TypeScript centralizados
-├── middleware.ts               # Next.js middleware (protección de rutas)
-├── supabase/migrations/
-│   └── 001_initial_schema.sql  # Migración SQL completa
-└── .env.example                # Template de variables de entorno
+│   ├── auth/
+│   │   ├── index.ts                  # JWT: createSessionToken, getSession, cookies
+│   │   └── client.ts                 # Cliente HTTP: signIn, signUp, getCurrentUser
+│   ├── db/
+│   │   └── prisma.ts                 # Prisma client singleton
+│   ├── audio.ts                      # Web Audio API: beep MSN + buzz
+│   ├── broadcast-store.ts            # Store compartido para zumbidos
+│   └── utils.ts                      # sanitizeMessage, convertEmoticons, isAsciiArt,
+│                                      # processMessageContent, formatRelativeTime, etc.
+├── prisma/
+│   └── schema.prisma                 # Schema: User, Profile, Room, Message,
+│                                      # Friendship, DirectMessage, Block, Report, etc.
+├── instrumentation.ts                # prisma db push automático al arrancar
+├── proxy.ts                          # Middleware: protección de rutas + SSE proxy
+├── types/index.ts                    # Tipos TypeScript + EMOTICONS
+└── package.json                      # Scripts: dev, build, start, db:push
 ```
 
 ---
 
-## 🚀 Configuración y Desarrollo Local
+## 🗄️ Base de Datos (Prisma + PostgreSQL)
+
+### Modelos
+
+| Modelo | Tabla | Descripción |
+|---|---|---|
+| User | `users` | Autenticación (id, passwordHash) |
+| Profile | `profiles` | Perfil público (username, displayName, avatar, status, bio, role) |
+| Room | `rooms` | Salas (name, slug, description, category, isPrivate, passwordHash) |
+| RoomMember | `room_members` | Membresías (role, bannedAt, banReason) |
+| Message | `messages` | Mensajes de sala (content, isSystem, soft delete) |
+| **Friendship** | `friendships` | Amistad (status: pending/accepted/rejected) |
+| **DirectMessage** | `direct_messages` | Mensajes privados (senderId, receiverId, readAt) |
+| Block | `blocks` | Usuarios bloqueados |
+| Report | `reports` | Reportes de contenido |
+| RoomPresence | `room_presence` | Presencia activa en salas |
+
+---
+
+## 🚀 Desarrollo Local
 
 ### Prerrequisitos
-
 - Node.js 18+
-- npm
-- Cuenta en [Supabase](https://supabase.com) (gratuita)
+- PostgreSQL (local o Railway)
 
 ### 1. Instalar dependencias
-
 ```bash
 npm install
 ```
 
-### 2. Configurar Supabase
-
-1. Ve a [supabase.com](https://supabase.com) y crea un nuevo proyecto.
-2. En **Project Settings → API**, copia:
-   - `Project URL`
-   - `anon public` key
-   - `service_role` key (mantenerla secreta)
-
-### 3. Variables de entorno
-
-```bash
-cp .env.example .env.local
-```
-
-Edita `.env.local`:
-
+### 2. Variables de entorno
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+# .env.local
+DATABASE_URL="postgresql://user:pass@host:5432/retrochat"
+JWT_SECRET="tu-secreto-jwt-min-32-chars"
 ```
 
-### 4. Ejecutar la migración SQL
+### 3. Sincronizar base de datos
+```bash
+npx prisma db push
+npx prisma generate
+```
 
-1. Ve a **Supabase Dashboard → SQL Editor**
-2. Abre el archivo `supabase/migrations/001_initial_schema.sql`
-3. Copia y pega todo el contenido en el SQL Editor
-4. Haz clic en **Run All**
-
-Esto creará todas las tablas, funciones, triggers y políticas RLS automáticamente.
-
-### 5. Configurar Auth en Supabase
-
-En **Supabase Dashboard → Authentication → Settings**:
-- **Site URL**: `http://localhost:3000`
-- **Redirect URLs**: `http://localhost:3000/**`
-- Para desarrollo, podés desactivar la confirmación de email
-
-### 6. Habilitar Realtime
-
-En **Supabase Dashboard → Database → Replication**:
-- Habilitar replication para la tabla `messages`
-- Habilitar replication para la tabla `room_members`
-
-### 7. Correr localmente
-
+### 4. Correr
 ```bash
 npm run dev
 ```
-
 Abre [http://localhost:3000](http://localhost:3000)
 
-### 8. Crear usuario Admin (opcional)
-
-1. Regístrate normalmente en la app
-2. En Supabase SQL Editor:
-
-```sql
-UPDATE profiles SET role = 'admin' WHERE username = 'tu_username';
-```
-
 ---
 
-## 🌐 Deploy en Vercel + Supabase
+## 🌐 Deploy en Railway
 
-### 1. Deploy en Vercel
+1. Conectar repositorio de GitHub
+2. Agregar variable `DATABASE_URL` (Railway PostgreSQL)
+3. Agregar `JWT_SECRET`
+4. Deploy automático al pushear a `main`
 
-```bash
-npx vercel --prod
-```
-
-O desde el dashboard de Vercel importando el repositorio.
-
-### 2. Variables de entorno en Vercel
-
-En Vercel → Settings → Environment Variables:
-
-```
-NEXT_PUBLIC_SUPABASE_URL = https://tu-proyecto.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY = eyJhbGci...
-SUPABASE_SERVICE_ROLE_KEY = eyJhbGci...
-NEXT_PUBLIC_APP_URL = https://tu-dominio.vercel.app
-```
-
-### 3. Actualizar URLs en Supabase
-
-En **Supabase → Authentication → Settings**:
-- **Site URL**: `https://tu-dominio.vercel.app`
-- **Redirect URLs**: Agrega `https://tu-dominio.vercel.app/**`
-
----
-
-## 🗄️ Base de Datos
-
-### Tablas principales
-
-| Tabla | Descripción |
-|-------|-------------|
-| `profiles` | Perfiles de usuarios (extiende auth.users) |
-| `rooms` | Salas de chat |
-| `room_members` | Membresías y roles en salas |
-| `messages` | Mensajes (soft delete) |
-| `blocks` | Usuarios bloqueados |
-| `reports` | Reportes de contenido |
-| `room_presence` | Presencia activa de usuarios |
-
-### Políticas RLS activas
-
-- ✅ Perfiles: lectura pública, escritura solo propia
-- ✅ Salas: públicas visibles para todos; privadas solo para miembros
-- ✅ Mensajes: solo miembros de sala pueden leer/escribir; no baneados
-- ✅ Moderación: solo mods/owners pueden borrar mensajes
-- ✅ Reportes: solo admins ven todos; usuarios ven los suyos
-- ✅ Bloqueos: solo el bloqueador ve sus bloqueos
-
----
-
-## 🎨 Diseño Visual
-
-El diseño emula la estética Web 2.0 de 2009:
-
-- **Fondo**: Gradiente azul/violeta oscuro (estilo Messenger/foro)
-- **Paneles**: Fondo gradiente claro con bordes y sombras suaves
-- **Botones**: Efecto brillante con gradiente (Web 2.0 glossy)
-- **Tipografía**: Tahoma/Verdana/Arial (fuentes de la época)
-- **Avatares**: Cuadrados 96x96, borde redondeado
-- **Badges**: NEW!, HOT, ONLINE, PRIVADA
-- **Emoticones**: Conversión automática de texto a emojis
-
----
-
-## 💬 Comandos de Chat
-
-| Comando | Descripción |
-|---------|-------------|
-| `/me <texto>` | Mensaje de acción estilo IRC |
-| `/clear` | Limpiar vista del chat (local, sin borrar del servidor) |
-| `/rules` | Ver reglas de la sala |
+El build ejecuta `prisma generate && next build`.  
+Al arrancar, `instrumentation.ts` ejecuta `prisma db push` automáticamente.
 
 ---
 
 ## 🔐 Seguridad
 
-- **RLS (Row Level Security)** habilitado en todas las tablas
-- **Contraseñas de salas** hasheadas con bcryptjs (salt 10)
-- **Contenido sanitizado**: escape de HTML peligroso en mensajes
-- **Rate limiting básico**: 1 mensaje por segundo por usuario (server-side)
-- **Validación de permisos** en el servidor (Server Actions, nunca solo en frontend)
-- **Claves privadas** nunca expuestas en el cliente
-- **Headers de seguridad**: X-Frame-Options, X-XSS-Protection
+- **JWT** con `jose` (HS256), cookies `httpOnly`, `sameSite: lax`, 7 días
+- **Contraseñas** hasheadas con bcryptjs (salt 10)
+- **Validación server-side** en todas las mutaciones (Server Actions)
+- **Headers**: X-Frame-Options, X-XSS-Protection, X-Content-Type-Options
+- **React** escapa XSS automáticamente al renderizar `{text}`
 
 ---
 
-## 📝 Datos de Ejemplo
-
-Para probar la app, después de crear tu cuenta admin:
-
-```sql
--- Reemplazá <tu-user-id> con tu UUID de auth.users
-INSERT INTO rooms (name, slug, description, category, owner_id, is_private) VALUES
-  ('Sala General', 'general', 'Bienvenidos a RetroChat 2009. ¡Hablen de todo!', 'general', '<tu-user-id>', false),
-  ('Música 2009', 'musica-2009', 'Linkin Park, MCR, Soda Stereo...', 'musica', '<tu-user-id>', false),
-  ('Geeks y Tecnología', 'tecnologia', 'Frikis del internet bienvenidos', 'tecnologia', '<tu-user-id>', false);
-
-INSERT INTO room_members (room_id, user_id, role)
-SELECT id, '<tu-user-id>', 'owner' FROM rooms WHERE owner_id = '<tu-user-id>';
-```
-
----
-
-## 🐛 Troubleshooting
-
-**Los mensajes no llegan en tiempo real**
-→ Verificá que Realtime está habilitado en Supabase → Database → Replication
-
-**Error de autenticación al registrarse**
-→ Revisá las Redirect URLs en Supabase Auth Settings
-
-**RLS bloqueando operaciones**
-→ Revisá las políticas en Supabase → Authentication → Policies
-
-**Error "Column X does not exist"**
-→ Ejecutá la migración completa desde el SQL Editor de Supabase
-
----
-
-*"Mejor visto en Internet Explorer 7 a 800x600 resolución" — RetroChat 2009*
-# retrochat2009
+*"Mejor visto en Internet Explorer 7 a 1024x768 resolución" — RetroChat 2009*
