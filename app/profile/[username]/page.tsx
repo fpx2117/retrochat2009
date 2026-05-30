@@ -33,20 +33,25 @@ export default async function ProfilePage({ params }: Props) {
   })
 
   // Amigos aceptados
-  const friendships = await prisma.friendship.findMany({
-    where: {
-      status: 'accepted',
-      OR: [
-        { requesterId: profile.id },
-        { addresseeId: profile.id },
-      ],
-    },
-    include: {
-      requester: { select: { id: true, username: true, displayName: true, avatarUrl: true, status: true } },
-      addressee: { select: { id: true, username: true, displayName: true, avatarUrl: true, status: true } },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+  let friendships: any[] = []
+  try {
+    friendships = await prisma.friendship.findMany({
+      where: {
+        status: 'accepted',
+        OR: [
+          { requesterId: profile.id },
+          { addresseeId: profile.id },
+        ],
+      },
+      include: {
+        requester: { select: { id: true, username: true, displayName: true, avatarUrl: true, status: true } },
+        addressee: { select: { id: true, username: true, displayName: true, avatarUrl: true, status: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+  } catch (e) {
+    console.error('Error cargando amistades:', e)
+  }
 
   const friends = friendships
     .map(f => f.requesterId === profile.id ? f.addressee : f.requester)
@@ -57,40 +62,47 @@ export default async function ProfilePage({ params }: Props) {
   let friendshipId: string | null = null
 
   if (currentUserId && !isOwnProfile) {
-    const existingFriendship = await prisma.friendship.findFirst({
-      where: {
-        OR: [
-          { requesterId: currentUserId, addresseeId: profile.id },
-          { requesterId: profile.id, addresseeId: currentUserId },
-        ],
-      },
-    })
+    try {
+      const existingFriendship = await prisma.friendship.findFirst({
+        where: {
+          OR: [
+            { requesterId: currentUserId, addresseeId: profile.id },
+            { requesterId: profile.id, addresseeId: currentUserId },
+          ],
+        },
+      })
 
-    if (existingFriendship) {
-      friendshipId = existingFriendship.id
-      if (existingFriendship.status === 'accepted') {
-        friendshipStatus = 'accepted'
-      } else if (existingFriendship.status === 'pending') {
-        friendshipStatus = existingFriendship.requesterId === currentUserId ? 'pending_sent' : 'pending_received'
+      if (existingFriendship) {
+        friendshipId = existingFriendship.id
+        if (existingFriendship.status === 'accepted') {
+          friendshipStatus = 'accepted'
+        } else if (existingFriendship.status === 'pending') {
+          friendshipStatus = existingFriendship.requesterId === currentUserId ? 'pending_sent' : 'pending_received'
+        }
       }
+    } catch (e) {
+      console.error('Error verificando amistad:', e)
     }
   }
 
-  // Solicitudes pendientes (solo perfil propio)
   let pendingRequests: any[] = []
   if (isOwnProfile) {
-    const pending = await prisma.friendship.findMany({
-      where: { addresseeId: profile.id, status: 'pending' },
-      include: {
-        requester: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
-    pendingRequests = pending.map(p => ({
-      id: p.id,
-      requester: p.requester,
-      created_at: p.createdAt.toISOString(),
-    }))
+    try {
+      const pending = await prisma.friendship.findMany({
+        where: { addresseeId: profile.id, status: 'pending' },
+        include: {
+          requester: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      pendingRequests = pending.map(p => ({
+        id: p.id,
+        requester: p.requester,
+        created_at: p.createdAt.toISOString(),
+      }))
+    } catch (e) {
+      console.error('Error cargando solicitudes pendientes:', e)
+    }
   }
 
   const validStatus = (['online', 'away', 'busy', 'invisible'] as const).includes(profile.status as any)
