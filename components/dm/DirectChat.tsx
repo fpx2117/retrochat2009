@@ -194,10 +194,10 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
           <EmojiPicker onSelect={(code) => {
             setInputValue(prev => prev + ' ' + code + ' ')
           }} />
-          <input
-            ref={inputRef}
-            type="text"
-            className="retro-input flex-1 text-xs"
+          <textarea
+            ref={inputRef as any}
+            className="retro-input flex-1 text-xs resize-none"
+            rows={1}
             placeholder={`Mensaje a ${otherUser.displayName || otherUser.username}...`}
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}

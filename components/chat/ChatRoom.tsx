@@ -573,11 +573,11 @@ export function ChatRoom({
             <EmojiPicker onSelect={(code) => {
               setInputValue(prev => prev + ' ' + code + ' ')
             }} />
-            <input
-              type="text"
-              className="retro-input flex-1"
+            <textarea
+              className="retro-input flex-1 resize-none"
+              rows={1}
               placeholder={currentMember
-                ? `Escribí un mensaje... (prueba :D o /me baila)`
+                ? 'Escribí un mensaje... (Shift+Enter para nueva línea)'
                 : 'Únete a la sala para escribir'
               }
               value={inputValue}
