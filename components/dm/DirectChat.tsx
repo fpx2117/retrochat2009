@@ -84,10 +84,9 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
   }
 
   return (
-    <div className={`flex flex-col h-full bg-white ${isPopup ? 'h-screen' : 'h-[calc(100vh-80px)]'}`}>
+    <div className="flex flex-col h-full bg-white">
       {/* Barra de título MSN-Style */}
-      <div className="retro-header px-3 py-1.5 flex items-center justify-between flex-shrink-0"
-        style={{ cursor: isPopup ? 'default' : 'pointer' }}>
+      <div className="retro-header px-3 py-1.5 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
           <Avatar username={otherUser.username} avatarUrl={otherUser.avatarUrl}
             displayName={otherUser.displayName} size="sm" />
@@ -95,10 +94,8 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
             💬 Chat con {otherUser.displayName || otherUser.username}
           </span>
         </div>
-        {isPopup && (
-          <button onClick={() => window.close()}
-            className="text-white hover:text-red-200 text-xs font-bold px-2">✕</button>
-        )}
+        <button onClick={() => window.close()}
+          className="text-white hover:text-red-200 text-xs font-bold px-2">✕</button>
       </div>
 
       {/* Mensajes */}

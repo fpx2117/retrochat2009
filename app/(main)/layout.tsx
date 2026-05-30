@@ -1,5 +1,9 @@
 import type { Metadata } from 'next'
-import './globals.css'
+import '../globals.css'
+import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
+import { Toaster } from '@/components/ui/Toaster'
+import { TitleBlink } from '@/components/layout/TitleBlink'
 
 export const metadata: Metadata = {
   title: 'RetroChat 2009 - Chat en Tiempo Real',
@@ -15,7 +19,14 @@ export default function RootLayout({
   return (
     <html lang="es" className="h-full">
       <body className="min-h-screen flex flex-col">
-        {children}
+        <Toaster>
+          <TitleBlink />
+          <Header />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </Toaster>
       </body>
     </html>
   )
