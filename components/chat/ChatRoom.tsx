@@ -152,6 +152,13 @@ export function ChatRoom({
       } catch {}
     })
 
+    es.addEventListener('members_update', (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data)
+        setMembers(data)
+      } catch {}
+    })
+
     es.addEventListener('buzz', (e: MessageEvent) => {
       try {
         const data = JSON.parse(e.data)

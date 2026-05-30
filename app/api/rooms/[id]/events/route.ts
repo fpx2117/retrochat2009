@@ -25,6 +25,7 @@ export async function GET(
   const encoder = new TextEncoder()
   let lastCheckedId = lastMessageId || ''
   let lastBuzzTimestamp = Date.now()
+  let lastMemberCount = 0
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -89,6 +90,23 @@ export async function GET(
           for (const be of buzzEvents) {
             controller.enqueue(encoder.encode(
               `event: buzz\ndata: ${JSON.stringify(be)}\n\n`
+            ))
+          }
+
+          // Emitir cambios de miembros
+          const currentMembers = await prisma.roomMember.findMany({
+            where: { roomId, bannedAt: null },
+            include: {
+              profile: {
+                select: { id: true, username: true, displayName: true, avatarUrl: true, status: true },
+              },
+            },
+            orderBy: { role: 'desc' },
+          })
+          if (currentMembers.length !== lastMemberCount) {
+            lastMemberCount = currentMembers.length
+            controller.enqueue(encoder.encode(
+              `event: members_update\ndata: ${JSON.stringify(currentMembers)}\n\n`
             ))
           }
 
