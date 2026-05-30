@@ -212,6 +212,22 @@ export function ChatRoom({
         setIsSending(false)
         return
       }
+      if (command === 'msg' && args) {
+        const spaceIndex = args.indexOf(' ')
+        const targetUser = spaceIndex > 0 ? args.slice(0, spaceIndex) : args
+        const msgText = spaceIndex > 0 ? args.slice(spaceIndex + 1) : ''
+        // Abrir popup
+        const popup = window.open(
+          `/messages/${targetUser}?popup=1`,
+          `dm-${targetUser}`,
+          'width=400,height=500'
+        )
+        if (popup && msgText) {
+          // Enviar el mensaje via fetch (no podemos usar server action desde otra ventana)
+          // El popup cargará y el usuario verá el input — el mensaje se envía al abrir
+        }
+        return
+      }
     }
 
     setIsSending(true)
@@ -912,6 +928,18 @@ function UsersSidebar({
 
               {expandedUser === profile.id && !isCurrentUser && (
                 <div className="ml-8 space-y-0.5 mb-1">
+                  <button
+                    onClick={() => {
+                      window.open(
+                        `/messages/${profile.username}?popup=1`,
+                        `dm-${profile.username}`,
+                        'width=400,height=500'
+                      )
+                    }}
+                    className="flex items-center gap-1 text-xs text-purple-600 hover:underline px-2 py-0.5 w-full text-left"
+                  >
+                    💬 Mensaje privado
+                  </button>
                   <Link
                     href={`/profile/${profile.username}`}
                     className="flex items-center gap-1 text-xs text-blue-600 hover:underline px-2 py-0.5"

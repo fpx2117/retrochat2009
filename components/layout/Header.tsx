@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect, useCallback } from 'react'
 import { getCurrentUser, signOut } from '@/lib/auth/client'
 import { getPendingRequestCount } from '@/app/api/friends/actions'
+import { getUnreadCount } from '@/app/api/dm/actions'
+import { playMsnBeep } from '@/lib/audio'
 import type { UserStatus } from '@/types'
 import { getDefaultAvatar } from '@/lib/utils'
 import { USER_STATUSES } from '@/types'
@@ -23,6 +25,8 @@ export function Header() {
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
+  const [unreadDMs, setUnreadDMs] = useState(0)
+  const [dmNotification, setDmNotification] = useState<{ from: string; username: string } | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -39,8 +43,24 @@ export function Header() {
     const loadPending = async () => {
       const result = await getPendingRequestCount()
       if (result.count !== undefined) setPendingCount(result.count)
+      const dmResult = await getUnreadCount()
+      if (dmResult.count !== undefined) setUnreadDMs(dmResult.count)
     }
     loadPending()
+
+    // SSE para DMs
+    const es = new EventSource('/api/dm/events')
+    es.addEventListener('new_dm', (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data)
+        setDmNotification({ from: data.senderName, username: data.senderUsername })
+        setUnreadDMs(prev => prev + 1)
+        playMsnBeep()
+        setTimeout(() => setDmNotification(null), 8000)
+      } catch {}
+    })
+
+    return () => { es.close() }
   }, [user])
 
   const handleLogout = async () => {
@@ -141,6 +161,21 @@ export function Header() {
                       )}
                     </Link>
                     <Link
+                      href="/messages"
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-700 hover:bg-blue-50 transition-colors"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      💬 Mensajes
+                      {unreadDMs > 0 && (
+                        <span className="retro-badge ml-auto text-xs" style={{
+                          background: 'linear-gradient(180deg, #0078d4 0%, #005a9e 100%)',
+                          color: '#fff', padding: '0 6px', borderRadius: '8px', fontSize: '10px'
+                        }}>
+                          {unreadDMs}
+                        </span>
+                      )}
+                    </Link>
+                    <Link
                       href="/settings"
                       className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-700 hover:bg-blue-50 transition-colors"
                       onClick={() => setMenuOpen(false)}
@@ -181,7 +216,39 @@ export function Header() {
         </div>
       </div>
 
-      {/* Barra de usuarios online (decorativa) */}
+      {/* Barra de notificación MSN */}
+      {dmNotification && (
+        <div className="px-4 py-1.5 flex items-center justify-between gap-3 text-xs"
+          style={{ background: 'linear-gradient(180deg, #fff9c4 0%, #fff176 100%)', borderBottom: '1px solid #f9a825' }}>
+          <span className="text-gray-800 font-bold">
+            ✉️ <strong>{dmNotification.from}</strong> te ha enviado un mensaje
+          </span>
+          <div className="flex gap-2 flex-shrink-0">
+            <button
+              onClick={() => {
+                window.open(
+                  `/messages/${dmNotification.username}?popup=1`,
+                  `dm-${dmNotification.username}`,
+                  'width=400,height=500'
+                )
+                setDmNotification(null)
+                setUnreadDMs(prev => Math.max(0, prev - 1))
+              }}
+              className="retro-btn retro-btn-primary text-xs"
+            >
+              Responder
+            </button>
+            <button
+              onClick={() => setDmNotification(null)}
+              className="text-gray-500 hover:text-gray-800 font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Barra decorativa */}
       <div className="bg-black/20 px-4 py-0.5 text-center">
         <span className="text-blue-200 text-xs opacity-70">
           ★ Bienvenido a RetroChat 2009 - El chat más retro de internet ★

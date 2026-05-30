@@ -98,6 +98,19 @@ export interface FriendshipWithProfiles extends Friendship {
   addressee: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'status'>
 }
 
+export interface DirectMessage {
+  id: string
+  sender_id: string
+  receiver_id: string
+  content: string
+  created_at: string
+  read_at: string | null
+}
+
+export interface DirectMessageWithProfile extends DirectMessage {
+  sender: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'>
+}
+
 export interface Report {
   id: string
   reporter_id: string
