@@ -38,19 +38,24 @@ export default async function MessagesPage({ params, searchParams }: Props) {
   if (!currentUser) redirect('/login')
 
   // Cargar historial
-  const messages = await prisma.directMessage.findMany({
-    where: {
-      OR: [
-        { senderId: session.id, receiverId: otherUser.id },
-        { senderId: otherUser.id, receiverId: session.id },
-      ],
-    },
-    include: {
-      sender: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
-    },
-    orderBy: { createdAt: 'asc' },
-    take: 100,
-  })
+  let messages: any[] = []
+  try {
+    messages = await prisma.directMessage.findMany({
+      where: {
+        OR: [
+          { senderId: session.id, receiverId: otherUser.id },
+          { senderId: otherUser.id, receiverId: session.id },
+        ],
+      },
+      include: {
+        sender: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+      },
+      orderBy: { createdAt: 'asc' },
+      take: 100,
+    })
+  } catch (e) {
+    console.error('Error cargando historial de mensajes:', e)
+  }
 
   const isPopup = popup === '1'
 

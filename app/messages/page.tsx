@@ -11,27 +11,32 @@ export default async function MessagesListPage() {
   const session = await getSession()
   if (!session) redirect('/login')
 
-  // Obtener conversaciones (usuarios con los que tengo DMs)
-  const conversations = await prisma.directMessage.groupBy({
-    by: ['senderId'],
-    where: { receiverId: session.id },
-  })
+  let profiles: any[] = []
 
-  const receivedFromIds = conversations.map(c => c.senderId)
+  try {
+    const conversations = await prisma.directMessage.groupBy({
+      by: ['senderId'],
+      where: { receiverId: session.id },
+    })
 
-  const sentTo = await prisma.directMessage.groupBy({
-    by: ['receiverId'],
-    where: { senderId: session.id },
-  })
+    const receivedFromIds = conversations.map(c => c.senderId)
 
-  const sentToIds = sentTo.map(s => s.receiverId)
+    const sentTo = await prisma.directMessage.groupBy({
+      by: ['receiverId'],
+      where: { senderId: session.id },
+    })
 
-  const allIds = [...new Set([...receivedFromIds, ...sentToIds])]
+    const sentToIds = sentTo.map(s => s.receiverId)
 
-  const profiles = allIds.length > 0 ? await prisma.profile.findMany({
-    where: { id: { in: allIds } },
-    select: { id: true, username: true, displayName: true, avatarUrl: true, status: true },
-  }) : []
+    const allIds = [...new Set([...receivedFromIds, ...sentToIds])]
+
+    profiles = allIds.length > 0 ? await prisma.profile.findMany({
+      where: { id: { in: allIds } },
+      select: { id: true, username: true, displayName: true, avatarUrl: true, status: true },
+    }) : []
+  } catch (e) {
+    console.error('Error cargando mensajes:', e)
+  }
 
   return (
     <div className="min-h-[calc(100vh-120px)] py-8 px-4">
