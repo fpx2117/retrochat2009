@@ -152,11 +152,11 @@ export function DirectChat({ currentUser, otherUser, initialMessages, isPopup }:
                       {sender.displayName || sender.username || otherUser.displayName}
                     </span>
                   )}
-                  <div className={`px-2.5 py-1.5 rounded-lg text-xs whitespace-pre-wrap break-words ${
+                  <div className={`px-2.5 py-1.5 rounded-lg text-sm whitespace-pre-wrap break-words ${
                     isAsciiArt(msg.content) ? 'font-mono' : ''
                   } ${
                     isOwn
-                      ? 'bg-blue-500 text-white rounded-br-sm'
+                      ? 'bg-blue-400 text-white rounded-br-sm'
                       : 'bg-white border border-gray-200 rounded-bl-sm shadow-sm'
                   }`}>
                     {content}

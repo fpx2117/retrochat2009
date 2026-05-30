@@ -806,7 +806,7 @@ function MessageItem({
             </span>
           </div>
 
-          <div className={`text-xs text-gray-800 whitespace-pre-wrap break-words ${
+          <div className={`text-sm text-gray-800 whitespace-pre-wrap break-words ${
             isAsciiArt(message.content) ? 'font-mono' : ''
           }`}>
             {content}
