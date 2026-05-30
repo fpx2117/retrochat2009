@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect, useCallback } from 'react'
 import { getCurrentUser, signOut } from '@/lib/auth/client'
+import { getPendingRequestCount } from '@/app/api/friends/actions'
 import type { UserStatus } from '@/types'
 import { getDefaultAvatar } from '@/lib/utils'
 import { USER_STATUSES } from '@/types'
@@ -21,6 +22,7 @@ export function Header() {
   const [user, setUser] = useState<HeaderUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
@@ -31,6 +33,15 @@ export function Header() {
     }
     loadUser()
   }, [])
+
+  useEffect(() => {
+    if (!user) return
+    const loadPending = async () => {
+      const result = await getPendingRequestCount()
+      if (result.count !== undefined) setPendingCount(result.count)
+    }
+    loadPending()
+  }, [user])
 
   const handleLogout = async () => {
     await signOut()
@@ -120,6 +131,14 @@ export function Header() {
                       onClick={() => setMenuOpen(false)}
                     >
                       👤 Mi perfil
+                      {pendingCount > 0 && (
+                        <span className="retro-badge ml-auto text-xs" style={{
+                          background: 'linear-gradient(180deg, #cc0000 0%, #990000 100%)',
+                          color: '#fff', padding: '0 6px', borderRadius: '8px', fontSize: '10px'
+                        }}>
+                          {pendingCount}
+                        </span>
+                      )}
                     </Link>
                     <Link
                       href="/settings"

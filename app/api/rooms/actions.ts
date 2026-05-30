@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db/prisma'
 import { getSession } from '@/lib/auth'
 import { generateSlug } from '@/lib/utils'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import bcrypt from 'bcryptjs'
 import { ROOM_CATEGORIES } from '@/types'
 
@@ -237,5 +238,50 @@ export async function promoteToModerator(roomId: string, targetUserId: string) {
     data: { role: 'moderator' },
   })
 
+  return { success: true }
+}
+
+export async function updateRoom(roomId: string, formData: FormData) {
+  const session = await getSession()
+  if (!session) return { error: 'No autenticado' }
+
+  const member = await prisma.roomMember.findUnique({
+    where: { roomId_userId: { roomId, userId: session.id } },
+    select: { role: true },
+  })
+
+  if (member?.role !== 'owner') {
+    return { error: 'Solo el dueño puede editar esta sala' }
+  }
+
+  const name = (formData.get('name') as string).trim()
+  const description = (formData.get('description') as string).trim()
+  const category = formData.get('category') as string
+  const isPrivate = formData.get('is_private') === 'on'
+
+  if (!name || name.length < 2 || name.length > 50) {
+    return { error: 'El nombre debe tener entre 2 y 50 caracteres' }
+  }
+  if (description.length > 200) {
+    return { error: 'La descripción es demasiado larga (máx 200 caracteres)' }
+  }
+  if (!ROOM_CATEGORIES.includes(category as any)) {
+    return { error: 'Categoría inválida' }
+  }
+
+  let slug = generateSlug(name)
+  const existingSlug = await prisma.room.findFirst({
+    where: { slug, id: { not: roomId } },
+  })
+  if (existingSlug) {
+    slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`
+  }
+
+  await prisma.room.update({
+    where: { id: roomId },
+    data: { name, slug, description, category, isPrivate },
+  })
+
+  revalidatePath(`/rooms/${roomId}/settings`)
   return { success: true }
 }

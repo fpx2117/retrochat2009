@@ -7,9 +7,9 @@ export async function proxy(request: NextRequest) {
 
   // Rutas protegidas que requieren autenticación
   const protectedPaths = ['/settings', '/rooms/new', '/admin']
-  const isProtectedPath = protectedPaths.some(path =>
-    request.nextUrl.pathname.startsWith(path)
-  )
+  const pathname = request.nextUrl.pathname
+  const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
+    || pathname.endsWith('/settings')
 
   // Rutas solo para no autenticados
   const authPaths = ['/login', '/register']

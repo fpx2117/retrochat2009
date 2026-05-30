@@ -12,6 +12,7 @@ export type UserStatus = 'online' | 'away' | 'busy' | 'invisible'
 export type UserRole = 'user' | 'moderator' | 'admin'
 export type RoomMemberRole = 'member' | 'moderator' | 'owner'
 export type ReportStatus = 'pending' | 'reviewed' | 'resolved' | 'dismissed'
+export type FriendshipStatus = 'pending' | 'accepted' | 'rejected'
 
 export interface Profile {
   id: string
@@ -81,6 +82,20 @@ export interface Block {
   blocker_id: string
   blocked_id: string
   created_at: string
+}
+
+export interface Friendship {
+  id: string
+  requester_id: string
+  addressee_id: string
+  status: FriendshipStatus
+  created_at: string
+  updated_at: string
+}
+
+export interface FriendshipWithProfiles extends Friendship {
+  requester: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'status'>
+  addressee: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url' | 'status'>
 }
 
 export interface Report {

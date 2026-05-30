@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { sendMessage, deleteMessage, loadMoreMessages, reportContent, blockUser } from '@/app/api/messages/actions'
-import { joinRoom, leaveRoom, banUser, promoteToModerator } from '@/app/api/rooms/actions'
+import { joinRoom, leaveRoom, banUser, promoteToModerator, closeRoom } from '@/app/api/rooms/actions'
 import { convertEmoticons, formatMessageTime, formatRelativeTime, parseCommand } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -58,6 +58,8 @@ export function ChatRoom({
   const [reportDialog, setReportDialog] = useState<{ messageId?: string; userId?: string } | null>(null)
   const [reportReason, setReportReason] = useState('')
   const [confirmBan, setConfirmBan] = useState<{ userId: string; username: string } | null>(null)
+  const [showCloseRoomConfirm, setShowCloseRoomConfirm] = useState(false)
+  const [closeRoomError, setCloseRoomError] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
@@ -305,6 +307,19 @@ export function ChatRoom({
     setConfirmBan(null)
   }
 
+  // ─── Cerrar sala ────────────────────────────────────────────
+
+  const handleCloseRoom = async () => {
+    setCloseRoomError(null)
+    const result = await closeRoom(room.id)
+    if (result.error) {
+      setCloseRoomError(result.error)
+      setShowCloseRoomConfirm(false)
+    } else {
+      router.push('/rooms')
+    }
+  }
+
   // ─── Bloquear ───────────────────────────────────────────────
 
   const handleBlock = async (userId: string) => {
@@ -433,9 +448,18 @@ export function ChatRoom({
             )}
 
             {isOwner && (
-              <Link href={`/rooms/${room.id}/settings`} className="retro-btn retro-btn-secondary text-xs">
-                ⚙️
-              </Link>
+              <>
+                <Link href={`/rooms/${room.id}/settings`} className="retro-btn retro-btn-secondary text-xs">
+                  ⚙️ Configurar
+                </Link>
+                <button
+                  onClick={() => setShowCloseRoomConfirm(true)}
+                  className="retro-btn retro-btn-danger text-xs"
+                  title="Cerrar sala definitivamente"
+                >
+                  🔒 Cerrar
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -631,6 +655,17 @@ export function ChatRoom({
         danger
         onConfirm={handleBan}
         onCancel={() => setConfirmBan(null)}
+      />
+
+      {/* Dialog cerrar sala */}
+      <ConfirmDialog
+        isOpen={showCloseRoomConfirm}
+        title="⚠️ ¿Cerrar esta sala?"
+        message="La sala se cerrará permanentemente. Nadie más podrá entrar ni enviar mensajes. Esta acción no se puede deshacer."
+        confirmLabel="Cerrar sala"
+        danger
+        onConfirm={handleCloseRoom}
+        onCancel={() => setShowCloseRoomConfirm(false)}
       />
 
       {/* Rules overlay */}

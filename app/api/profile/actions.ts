@@ -1,8 +1,10 @@
 'use server'
 
 import { prisma } from '@/lib/db/prisma'
-import { getSession } from '@/lib/auth'
+import { getSession, clearSessionCookie } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+import bcrypt from 'bcryptjs'
 
 export async function updateProfile(formData: FormData) {
   const session = await getSession()
@@ -50,4 +52,55 @@ export async function updateProfile(formData: FormData) {
   revalidatePath('/settings')
 
   return { success: true }
+}
+
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const session = await getSession()
+  if (!session) return { error: 'Debes iniciar sesión' }
+
+  if (!newPassword || newPassword.length < 6) {
+    return { error: 'La nueva contraseña debe tener al menos 6 caracteres' }
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.id },
+    select: { passwordHash: true },
+  })
+
+  if (!user) return { error: 'Usuario no encontrado' }
+
+  const valid = await bcrypt.compare(currentPassword, user.passwordHash)
+  if (!valid) return { error: 'La contraseña actual es incorrecta' }
+
+  const newHash = await bcrypt.hash(newPassword, 10)
+
+  await prisma.user.update({
+    where: { id: session.id },
+    data: { passwordHash: newHash },
+  })
+
+  return { success: true }
+}
+
+export async function deleteAccount(password: string) {
+  const session = await getSession()
+  if (!session) return { error: 'Debes iniciar sesión' }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.id },
+    select: { passwordHash: true },
+  })
+
+  if (!user) return { error: 'Usuario no encontrado' }
+
+  const valid = await bcrypt.compare(password, user.passwordHash)
+  if (!valid) return { error: 'Contraseña incorrecta' }
+
+  // Eliminar usuario — cascade elimina profile, mensajes, membresías, amistades, etc.
+  await prisma.user.delete({
+    where: { id: session.id },
+  })
+
+  await clearSessionCookie()
+  redirect('/')
 }

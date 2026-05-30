@@ -40,6 +40,12 @@ enum ReportStatus {
   dismissed
 }
 
+enum FriendshipStatus {
+  pending
+  accepted
+  rejected
+}
+
 // ─── TABLA: users (reemplaza auth.users de Supabase) ────────
 
 model User {
@@ -78,6 +84,8 @@ model Profile {
   receivedReports Report[]    @relation("Reported")
   reviewedReports Report[]    @relation("Reviewer")
   presence    RoomPresence[]
+  sentRequests     Friendship[] @relation("Requester")
+  receivedRequests Friendship[] @relation("Addressee")
 
   @@map("profiles")
 }
@@ -198,6 +206,26 @@ model Report {
 
   @@index([status])
   @@map("reports")
+}
+
+// ─── TABLA: friendships ───────────────────────────────────────
+
+model Friendship {
+  id          String           @id @default(uuid()) @db.Uuid
+  requesterId String           @map("requester_id") @db.Uuid
+  addresseeId String           @map("addressee_id") @db.Uuid
+  status      FriendshipStatus @default(pending)
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  requester Profile @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee Profile @relation("Addressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@index([requesterId])
+  @@index([addresseeId])
+  @@index([status])
+  @@map("friendships")
 }
 
 // ─── TABLA: room_presence ────────────────────────────────────
