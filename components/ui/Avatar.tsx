@@ -1,3 +1,5 @@
+'use client'
+
 import { getDefaultAvatar } from '@/lib/utils'
 import { USER_STATUSES, type UserStatus } from '@/types'
 
